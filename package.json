@@ -1,0 +1,10 @@
+{
+  "name": "ai-bookingmate",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Day 1 monorepo scaffold for AI BookingMate.",
+  "scripts": {
+    "dev:frontend": "npm --prefix frontend run dev",
+    "dev:backend": "npm --prefix backend run start:dev"
+  }
+}
