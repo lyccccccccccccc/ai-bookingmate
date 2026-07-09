@@ -21,6 +21,12 @@ Day 2 adds the PostgreSQL and Prisma foundation for the NestJS backend. The root
 
 See `docs/day-02-database.md` for the database design, manual Docker Compose startup command, migration command, Prisma Studio command, and Day 2 acceptance criteria.
 
+## Day 3 Authentication Setup
+
+Day 3 adds backend authentication with register, login, JWT-protected routes, request validation, and basic role-based access control for admin-only endpoints.
+
+See `docs/day-03-auth.md` for the auth flow, password hashing notes, JWT explanation, manual API testing commands, and Day 3 acceptance criteria.
+
 ## Planned Features
 
 - Customer booking workflow
