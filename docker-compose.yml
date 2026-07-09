@@ -1,0 +1,15 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: ai-bookingmate-postgres
+    ports:
+      - "5433:5432"
+    environment:
+      POSTGRES_DB: ai_bookingmate
+      POSTGRES_USER: bookingmate_user
+      POSTGRES_PASSWORD: bookingmate_password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
