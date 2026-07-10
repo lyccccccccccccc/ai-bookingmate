@@ -27,6 +27,12 @@ Day 3 adds backend authentication with register, login, JWT-protected routes, re
 
 See `docs/day-03-auth.md` for the auth flow, password hashing notes, JWT explanation, manual API testing commands, and Day 3 acceptance criteria.
 
+## Day 4 Services API
+
+Day 4 adds backend endpoints for listing active services publicly and managing services through admin-only create, update, and soft delete actions.
+
+See `docs/day-04-services.md` for the service model explanation, endpoint list, manual curl testing steps, and Day 4 acceptance criteria.
+
 ## Planned Features
 
 - Customer booking workflow
