@@ -33,6 +33,12 @@ Day 4 adds backend endpoints for listing active services publicly and managing s
 
 See `docs/day-04-services.md` for the service model explanation, endpoint list, manual curl testing steps, and Day 4 acceptance criteria.
 
+## Day 5 Time Slots API
+
+Day 5 adds backend endpoints for admins to create and manage service time slots, plus a public endpoint for customers to view available slots for an active service.
+
+See `docs/day-05-time-slots.md` for time slot status rules, overlap detection, endpoint details, manual curl testing steps, and Day 5 acceptance criteria.
+
 ## Planned Features
 
 - Customer booking workflow
