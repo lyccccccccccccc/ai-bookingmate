@@ -8,6 +8,7 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Role, TimeSlotStatus } from '@prisma/client';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
@@ -21,16 +22,20 @@ type TimeSlotFilters = {
   status?: TimeSlotStatus;
 };
 
+@ApiTags('time-slots')
 @Controller()
 export class TimeSlotsController {
   constructor(private readonly timeSlotsService: TimeSlotsService) {}
 
   @Get('services/:serviceId/time-slots')
+  @ApiOperation({ summary: 'List available time slots for a service' })
   findAvailableByService(@Param('serviceId') serviceId: string) {
     return this.timeSlotsService.findAvailableByService(serviceId);
   }
 
   @Post('time-slots')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Create a time slot as admin' })
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
   create(@Body() createTimeSlotDto: CreateTimeSlotDto) {
@@ -38,6 +43,8 @@ export class TimeSlotsController {
   }
 
   @Get('time-slots')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'List time slots as admin' })
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
   findAllForAdmin(@Query() filters: TimeSlotFilters) {
@@ -45,6 +52,8 @@ export class TimeSlotsController {
   }
 
   @Patch('time-slots/:id/status')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Update a time slot status as admin' })
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
   updateStatus(

@@ -1,4 +1,5 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post, UseGuards } from '@nestjs/common';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Role } from '@prisma/client';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
@@ -7,21 +8,26 @@ import { CreateServiceDto } from './dto/create-service.dto';
 import { UpdateServiceDto } from './dto/update-service.dto';
 import { ServicesService } from './services.service';
 
+@ApiTags('services')
 @Controller('services')
 export class ServicesController {
   constructor(private readonly servicesService: ServicesService) {}
 
   @Get()
+  @ApiOperation({ summary: 'List active services' })
   findAll() {
     return this.servicesService.findAll();
   }
 
   @Get(':id')
+  @ApiOperation({ summary: 'Get one active service' })
   findOne(@Param('id') id: string) {
     return this.servicesService.findOne(id);
   }
 
   @Post()
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Create a service as admin' })
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
   create(@Body() createServiceDto: CreateServiceDto) {
@@ -29,6 +35,8 @@ export class ServicesController {
   }
 
   @Patch(':id')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Update a service as admin' })
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
   update(
@@ -39,6 +47,8 @@ export class ServicesController {
   }
 
   @Delete(':id')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Soft delete a service as admin' })
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
   deactivate(@Param('id') id: string) {

@@ -45,6 +45,23 @@ Day 6 adds backend endpoints for authenticated customers to create and cancel bo
 
 See `docs/day-06-bookings.md` for booking transactions, double-booking prevention, customer and admin endpoints, manual curl testing steps, and Day 6 acceptance criteria.
 
+## Day 7 Developer Experience
+
+Day 7 adds Swagger API documentation at `http://localhost:3000/api/docs`, a `GET /health` endpoint, and an idempotent backend seed script.
+
+Run seed data from the backend folder:
+
+```cmd
+npm run seed
+```
+
+Seeded test accounts:
+
+- Admin: `admin@example.com` / `Password123!`
+- Customer: `customer.seed@example.com` / `Password123!`
+
+See `docs/day-07-seed-swagger.md` for Swagger usage, seed details, manual test commands, and Day 7 acceptance criteria.
+
 ## Planned Features
 
 - Customer booking workflow
