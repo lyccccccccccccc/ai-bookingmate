@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { AuthModule } from './auth/auth.module';
+import { BookingsModule } from './bookings/bookings.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { PrismaModule } from './prisma/prisma.module';
@@ -16,6 +17,7 @@ import { TimeSlotsModule } from './time-slots/time-slots.module';
     AuthModule,
     ServicesModule,
     TimeSlotsModule,
+    BookingsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

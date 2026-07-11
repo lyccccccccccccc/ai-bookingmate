@@ -39,6 +39,12 @@ Day 5 adds backend endpoints for admins to create and manage service time slots,
 
 See `docs/day-05-time-slots.md` for time slot status rules, overlap detection, endpoint details, manual curl testing steps, and Day 5 acceptance criteria.
 
+## Day 6 Bookings API
+
+Day 6 adds backend endpoints for authenticated customers to create and cancel bookings, plus admin endpoints for listing and updating booking status.
+
+See `docs/day-06-bookings.md` for booking transactions, double-booking prevention, customer and admin endpoints, manual curl testing steps, and Day 6 acceptance criteria.
+
 ## Planned Features
 
 - Customer booking workflow
