@@ -62,6 +62,14 @@ Seeded test accounts:
 
 See `docs/day-07-seed-swagger.md` for Swagger usage, seed details, manual test commands, and Day 7 acceptance criteria.
 
+## Day 8 Frontend Authentication
+
+Day 8 adds React authentication pages, JWT session handling, protected dashboard routing, and backend CORS support for the Vite frontend.
+
+Frontend auth uses `VITE_API_BASE_URL=http://localhost:3000` and stores the JWT access token in localStorage under `accessToken`.
+
+See `docs/day-08-frontend-auth.md` for the auth flow, routes, manual testing steps, and Day 8 acceptance criteria.
+
 ## Planned Features
 
 - Customer booking workflow
