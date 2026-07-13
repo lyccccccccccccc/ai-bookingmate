@@ -1,25 +1,37 @@
 import { isAxiosError } from 'axios'
 import { useEffect, useState } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { Link, useNavigate, useParams } from 'react-router-dom'
+import { createBooking } from '../api/bookingsApi'
 import {
   getAvailableTimeSlots,
   getServiceById,
   type Service,
   type TimeSlot,
 } from '../api/servicesApi'
+import { useAuth } from '../auth/AuthContext'
 import { formatPrice } from '../components/ServiceCard'
 import { TimeSlotCard } from '../components/TimeSlotCard'
 
 export function ServiceDetailPage() {
   const { serviceId } = useParams()
+  const navigate = useNavigate()
+  const { user } = useAuth()
   const [service, setService] = useState<Service | null>(null)
   const [timeSlots, setTimeSlots] = useState<TimeSlot[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState('')
+  const [bookingMessage, setBookingMessage] = useState('')
+  const [bookingError, setBookingError] = useState('')
+  const [bookingTimeSlotId, setBookingTimeSlotId] = useState<string | null>(
+    null,
+  )
+
+  async function loadAvailableTimeSlots(currentServiceId: string) {
+    const timeSlotData = await getAvailableTimeSlots(currentServiceId)
+    setTimeSlots(timeSlotData)
+  }
 
   useEffect(() => {
-    let isMounted = true
-
     async function loadServiceDetails() {
       if (!serviceId) {
         setError('Service id is missing')
@@ -33,27 +45,44 @@ export function ServiceDetailPage() {
           getAvailableTimeSlots(serviceId),
         ])
 
-        if (isMounted) {
-          setService(serviceData)
-          setTimeSlots(timeSlotData)
-        }
+        setService(serviceData)
+        setTimeSlots(timeSlotData)
       } catch (caughtError) {
-        if (isMounted) {
-          setError(getErrorMessage(caughtError, 'Could not load service details'))
-        }
+        setError(getErrorMessage(caughtError, 'Could not load service details'))
       } finally {
-        if (isMounted) {
-          setIsLoading(false)
-        }
+        setIsLoading(false)
       }
     }
 
     void loadServiceDetails()
-
-    return () => {
-      isMounted = false
-    }
   }, [serviceId])
+
+  async function handleBookTimeSlot(timeSlotId: string) {
+    if (!serviceId) {
+      return
+    }
+
+    setBookingMessage('')
+    setBookingError('')
+    setBookingTimeSlotId(timeSlotId)
+
+    try {
+      await createBooking(timeSlotId, 'Booked from frontend')
+      setBookingMessage('Booking created successfully.')
+      navigate('/my-bookings')
+    } catch (caughtError) {
+      if (isAxiosError(caughtError) && caughtError.response?.status === 409) {
+        setBookingError(
+          'This time slot has already been booked. Please choose another time.',
+        )
+        await loadAvailableTimeSlots(serviceId)
+      } else {
+        setBookingError(getErrorMessage(caughtError, 'Could not create booking'))
+      }
+    } finally {
+      setBookingTimeSlotId(null)
+    }
+  }
 
   return (
     <main className="page service-detail-page">
@@ -63,6 +92,8 @@ export function ServiceDetailPage() {
 
       {isLoading ? <p className="state-message">Loading service...</p> : null}
       {error ? <p className="error-message">{error}</p> : null}
+      {bookingMessage ? <p className="success-message">{bookingMessage}</p> : null}
+      {bookingError ? <p className="error-message">{bookingError}</p> : null}
 
       {!isLoading && !error && service ? (
         <>
@@ -81,7 +112,7 @@ export function ServiceDetailPage() {
           <section className="time-slots-section">
             <div className="section-heading">
               <h2>Available time slots</h2>
-              <p>Booking buttons are placeholders until Day 10.</p>
+              <p>Choose an available time to create your booking.</p>
             </div>
 
             {timeSlots.length === 0 ? (
@@ -91,7 +122,28 @@ export function ServiceDetailPage() {
             ) : (
               <div className="time-slots-list">
                 {timeSlots.map((timeSlot) => (
-                  <TimeSlotCard key={timeSlot.id} timeSlot={timeSlot} />
+                  <TimeSlotCard
+                    key={timeSlot.id}
+                    timeSlot={timeSlot}
+                    action={
+                      user ? (
+                        <button
+                          className="button primary"
+                          type="button"
+                          onClick={() => void handleBookTimeSlot(timeSlot.id)}
+                          disabled={bookingTimeSlotId === timeSlot.id}
+                        >
+                          {bookingTimeSlotId === timeSlot.id
+                            ? 'Booking...'
+                            : 'Book this time'}
+                        </button>
+                      ) : (
+                        <Link className="button secondary" to="/login">
+                          Log in to book
+                        </Link>
+                      )
+                    }
+                  />
                 ))}
               </div>
             )}

@@ -1,10 +1,12 @@
 import type { TimeSlot } from '../api/servicesApi'
+import type { ReactNode } from 'react'
 
 type TimeSlotCardProps = {
   timeSlot: TimeSlot
+  action?: ReactNode
 }
 
-export function TimeSlotCard({ timeSlot }: TimeSlotCardProps) {
+export function TimeSlotCard({ timeSlot, action }: TimeSlotCardProps) {
   const startAt = new Date(timeSlot.startAt)
   const endAt = new Date(timeSlot.endAt)
 
@@ -19,14 +21,12 @@ export function TimeSlotCard({ timeSlot }: TimeSlotCardProps) {
 
       <span className="status-pill">{timeSlot.status}</span>
 
-      <button className="button secondary" type="button" disabled>
-        Booking coming in Day 10
-      </button>
+      {action ? <div className="slot-action">{action}</div> : null}
     </article>
   )
 }
 
-function formatDate(date: Date) {
+export function formatDate(date: Date) {
   return new Intl.DateTimeFormat(undefined, {
     weekday: 'short',
     month: 'short',
@@ -35,7 +35,7 @@ function formatDate(date: Date) {
   }).format(date)
 }
 
-function formatTime(date: Date) {
+export function formatTime(date: Date) {
   return new Intl.DateTimeFormat(undefined, {
     hour: 'numeric',
     minute: '2-digit',

@@ -22,6 +22,7 @@ export function NavBar() {
         {user ? (
           <>
             <NavLink to="/dashboard">Dashboard</NavLink>
+            <NavLink to="/my-bookings">My Bookings</NavLink>
             <button type="button" className="link-button" onClick={handleLogout}>
               Logout
             </button>

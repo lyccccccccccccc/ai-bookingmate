@@ -120,6 +120,11 @@ h1 {
   color: #111827;
 }
 
+.danger {
+  background: #dc2626;
+  color: #ffffff;
+}
+
 .full-width {
   width: 100%;
 }
@@ -352,6 +357,11 @@ dd {
   padding: 18px;
 }
 
+.slot-action {
+  display: flex;
+  justify-content: flex-end;
+}
+
 .slot-date {
   color: #111827;
   font-weight: 800;
@@ -361,6 +371,76 @@ dd {
 .slot-time {
   color: #4b5563;
   margin: 0;
+}
+
+.my-bookings-page {
+  display: grid;
+  gap: 18px;
+}
+
+.bookings-list {
+  display: grid;
+  gap: 16px;
+}
+
+.booking-card {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06);
+  display: grid;
+  gap: 18px;
+  padding: 24px;
+}
+
+.booking-card-header {
+  align-items: start;
+  display: flex;
+  gap: 16px;
+  justify-content: space-between;
+}
+
+.booking-card h2 {
+  color: #111827;
+  font-size: 24px;
+  line-height: 1.2;
+  margin: 0 0 8px;
+}
+
+.booking-details-grid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.booking-details-grid div {
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 14px;
+}
+
+.booking-notes {
+  background: #f9fafb;
+  border-left: 4px solid #2563eb;
+  color: #374151;
+  margin: 0;
+  padding: 12px 14px;
+}
+
+.status-pending {
+  background: #fffbeb;
+  color: #92400e;
+}
+
+.status-confirmed {
+  background: #ecfdf5;
+  color: #065f46;
+}
+
+.status-cancelled {
+  background: #f3f4f6;
+  color: #4b5563;
 }
 
 @media (max-width: 700px) {
@@ -389,6 +469,23 @@ dd {
 
   .time-slot-card {
     align-items: start;
+    grid-template-columns: 1fr;
+  }
+
+  .slot-action {
+    justify-content: stretch;
+    width: 100%;
+  }
+
+  .slot-action .button {
+    width: 100%;
+  }
+
+  .booking-card-header {
+    flex-direction: column;
+  }
+
+  .booking-details-grid {
     grid-template-columns: 1fr;
   }
 }

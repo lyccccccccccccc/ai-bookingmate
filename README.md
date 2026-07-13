@@ -78,6 +78,14 @@ Booking buttons are placeholders for Day 10 and do not call `POST /bookings` yet
 
 See `docs/day-09-frontend-services.md` for the service browsing flow, backend API calls, manual testing steps, and Day 9 acceptance criteria.
 
+## Day 10 Frontend Bookings
+
+Day 10 adds frontend booking creation from available time slots and a protected `My Bookings` page where customers can view and cancel their bookings.
+
+The frontend calls the existing booking API and leaves time slot status changes to the backend transaction.
+
+See `docs/day-10-frontend-bookings.md` for the booking flow, cancellation behavior, double-booking handling, manual testing steps, and Day 10 acceptance criteria.
+
 ## Planned Features
 
 - Customer booking workflow
