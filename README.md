@@ -70,6 +70,14 @@ Frontend auth uses `VITE_API_BASE_URL=http://localhost:3000` and stores the JWT 
 
 See `docs/day-08-frontend-auth.md` for the auth flow, routes, manual testing steps, and Day 8 acceptance criteria.
 
+## Day 9 Frontend Services Browsing
+
+Day 9 adds public React pages for browsing active services and viewing available time slots for each service.
+
+Booking buttons are placeholders for Day 10 and do not call `POST /bookings` yet.
+
+See `docs/day-09-frontend-services.md` for the service browsing flow, backend API calls, manual testing steps, and Day 9 acceptance criteria.
+
 ## Planned Features
 
 - Customer booking workflow

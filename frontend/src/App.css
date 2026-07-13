@@ -240,6 +240,129 @@ dd {
   justify-items: start;
 }
 
+.page-header {
+  margin-bottom: 32px;
+  max-width: 720px;
+}
+
+.services-grid {
+  display: grid;
+  gap: 18px;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+}
+
+.service-card,
+.service-detail-panel,
+.time-slot-card {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06);
+}
+
+.service-card {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  justify-content: space-between;
+  padding: 24px;
+}
+
+.service-card h2,
+.section-heading h2 {
+  color: #111827;
+  font-size: 24px;
+  line-height: 1.2;
+  margin: 0 0 8px;
+}
+
+.card-description {
+  color: #4b5563;
+  margin: 0;
+}
+
+.service-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.service-meta span,
+.status-pill {
+  background: #eff6ff;
+  border-radius: 999px;
+  color: #1d4ed8;
+  font-size: 14px;
+  font-weight: 700;
+  padding: 6px 10px;
+}
+
+.state-message {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  color: #4b5563;
+  margin: 0;
+  padding: 18px;
+}
+
+.service-detail-page {
+  display: grid;
+  gap: 20px;
+}
+
+.back-link {
+  color: #2563eb;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.back-link:hover {
+  text-decoration: underline;
+}
+
+.service-detail-panel {
+  padding: 28px;
+}
+
+.detail-meta {
+  margin-top: 22px;
+}
+
+.time-slots-section {
+  display: grid;
+  gap: 16px;
+}
+
+.section-heading p {
+  color: #6b7280;
+  margin: 0;
+}
+
+.time-slots-list {
+  display: grid;
+  gap: 12px;
+}
+
+.time-slot-card {
+  align-items: center;
+  display: grid;
+  gap: 16px;
+  grid-template-columns: 1fr auto auto;
+  padding: 18px;
+}
+
+.slot-date {
+  color: #111827;
+  font-weight: 800;
+  margin: 0 0 4px;
+}
+
+.slot-time {
+  color: #4b5563;
+  margin: 0;
+}
+
 @media (max-width: 700px) {
   .navbar {
     align-items: flex-start;
@@ -261,6 +384,11 @@ dd {
   }
 
   .user-details {
+    grid-template-columns: 1fr;
+  }
+
+  .time-slot-card {
+    align-items: start;
     grid-template-columns: 1fr;
   }
 }

@@ -18,6 +18,7 @@ export function NavBar() {
 
       <nav className="nav-links" aria-label="Main navigation">
         <NavLink to="/">Home</NavLink>
+        <NavLink to="/services">Services</NavLink>
         {user ? (
           <>
             <NavLink to="/dashboard">Dashboard</NavLink>

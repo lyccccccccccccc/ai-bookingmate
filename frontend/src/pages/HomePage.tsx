@@ -16,12 +16,20 @@ export function HomePage() {
 
         <div className="button-row">
           {user ? (
-            <Link className="button primary" to="/dashboard">
-              Go to Dashboard
-            </Link>
+            <>
+              <Link className="button primary" to="/services">
+                Browse Services
+              </Link>
+              <Link className="button secondary" to="/dashboard">
+                Go to Dashboard
+              </Link>
+            </>
           ) : (
             <>
-              <Link className="button primary" to="/login">
+              <Link className="button primary" to="/services">
+                Browse Services
+              </Link>
+              <Link className="button secondary" to="/login">
                 Login
               </Link>
               <Link className="button secondary" to="/register">
