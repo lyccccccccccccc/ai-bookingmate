@@ -96,31 +96,39 @@ export class BookingsService {
       throw new ConflictException('Time slot is not available');
     }
 
-    return this.prisma.$transaction(async (tx) => {
-      const updatedTimeSlot = await tx.timeSlot.updateMany({
-        where: {
-          id: dto.timeSlotId,
-          status: TimeSlotStatus.AVAILABLE,
-        },
-        data: {
-          status: TimeSlotStatus.BOOKED,
-        },
-      });
+    try {
+      return await this.prisma.$transaction(async (tx) => {
+        const updatedTimeSlot = await tx.timeSlot.updateMany({
+          where: {
+            id: dto.timeSlotId,
+            status: TimeSlotStatus.AVAILABLE,
+          },
+          data: {
+            status: TimeSlotStatus.BOOKED,
+          },
+        });
 
-      if (updatedTimeSlot.count === 0) {
+        if (updatedTimeSlot.count === 0) {
+          throw new ConflictException('Time slot is not available');
+        }
+
+        return tx.booking.create({
+          data: {
+            customerId: currentUser.id,
+            serviceId: timeSlot.serviceId,
+            timeSlotId: dto.timeSlotId,
+            notes: dto.notes,
+          },
+          select: customerBookingSelect,
+        });
+      });
+    } catch (error) {
+      if (this.isUniqueConstraintError(error)) {
         throw new ConflictException('Time slot is not available');
       }
 
-      return tx.booking.create({
-        data: {
-          customerId: currentUser.id,
-          serviceId: timeSlot.serviceId,
-          timeSlotId: dto.timeSlotId,
-          notes: dto.notes,
-        },
-        select: customerBookingSelect,
-      });
-    });
+      throw error;
+    }
   }
 
   findMyBookings(currentUser: AuthenticatedUser) {
@@ -259,5 +267,14 @@ export class BookingsService {
     }
 
     return booking;
+  }
+
+  private isUniqueConstraintError(
+    error: unknown,
+  ): error is Prisma.PrismaClientKnownRequestError {
+    return (
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === 'P2002'
+    );
   }
 }
