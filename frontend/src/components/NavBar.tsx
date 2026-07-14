@@ -23,6 +23,9 @@ export function NavBar() {
           <>
             <NavLink to="/dashboard">Dashboard</NavLink>
             <NavLink to="/my-bookings">My Bookings</NavLink>
+            {user.role === 'ADMIN' ? (
+              <NavLink to="/admin/bookings">Admin Bookings</NavLink>
+            ) : null}
             <button type="button" className="link-button" onClick={handleLogout}>
               Logout
             </button>

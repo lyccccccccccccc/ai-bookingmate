@@ -86,6 +86,14 @@ The frontend calls the existing booking API and leaves time slot status changes 
 
 See `docs/day-10-frontend-bookings.md` for the booking flow, cancellation behavior, double-booking handling, manual testing steps, and Day 10 acceptance criteria.
 
+## Day 11 Admin Booking Management
+
+Day 11 adds an admin-only frontend page at `/admin/bookings` for viewing, filtering, confirming, and cancelling customer bookings.
+
+The admin page is protected by a role-aware `AdminRoute`, while the backend remains the final authorization layer.
+
+See `docs/day-11-admin-bookings.md` for admin booking behavior, route protection, manual testing steps, and Day 11 acceptance criteria.
+
 ## Planned Features
 
 - Customer booking workflow

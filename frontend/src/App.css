@@ -169,7 +169,16 @@ input {
   padding: 11px 12px;
 }
 
-input:focus {
+select {
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  color: #111827;
+  font: inherit;
+  padding: 11px 12px;
+}
+
+input:focus,
+select:focus {
   border-color: #2563eb;
   outline: 3px solid rgba(37, 99, 235, 0.16);
 }
@@ -443,6 +452,40 @@ dd {
   color: #4b5563;
 }
 
+.access-denied-panel {
+  margin: 0 auto;
+}
+
+.admin-bookings-page {
+  display: grid;
+  gap: 18px;
+}
+
+.admin-toolbar {
+  align-items: center;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  display: flex;
+  justify-content: space-between;
+  padding: 18px;
+}
+
+.filter-label {
+  max-width: 260px;
+  width: 100%;
+}
+
+.admin-booking-grid {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+.booking-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
 @media (max-width: 700px) {
   .navbar {
     align-items: flex-start;
@@ -487,5 +530,14 @@ dd {
 
   .booking-details-grid {
     grid-template-columns: 1fr;
+  }
+
+  .admin-toolbar {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .filter-label {
+    max-width: none;
   }
 }
