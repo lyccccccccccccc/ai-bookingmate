@@ -94,9 +94,16 @@ The admin page is protected by a role-aware `AdminRoute`, while the backend rema
 
 See `docs/day-11-admin-bookings.md` for admin booking behavior, route protection, manual testing steps, and Day 11 acceptance criteria.
 
+## Day 12 Admin Services and Time Slots
+
+Day 12 adds admin-only frontend pages at `/admin/services` and `/admin/time-slots` for managing bookable services and availability.
+
+Admins can create, edit, and deactivate services, plus create, block, unblock, and filter time slots. The UI does not allow manually setting `BOOKED`; booking status remains controlled by the booking flow.
+
+See `docs/day-12-admin-services-time-slots.md` for admin service and time slot behavior, manual testing steps, and Day 12 acceptance criteria.
+
 ## Planned Features
 
 - Customer booking workflow
-- Admin service and time slot management
 - Role-based access control
 - AI FAQ assistant

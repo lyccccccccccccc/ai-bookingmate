@@ -5,6 +5,8 @@ import { AuthProvider } from './auth/AuthContext'
 import { ProtectedRoute } from './auth/ProtectedRoute'
 import { NavBar } from './components/NavBar'
 import { AdminBookingsPage } from './pages/AdminBookingsPage'
+import { AdminServicesPage } from './pages/AdminServicesPage'
+import { AdminTimeSlotsPage } from './pages/AdminTimeSlotsPage'
 import { DashboardPage } from './pages/DashboardPage'
 import { HomePage } from './pages/HomePage'
 import { LoginPage } from './pages/LoginPage'
@@ -30,6 +32,8 @@ function App() {
           </Route>
           <Route element={<AdminRoute />}>
             <Route path="/admin/bookings" element={<AdminBookingsPage />} />
+            <Route path="/admin/services" element={<AdminServicesPage />} />
+            <Route path="/admin/time-slots" element={<AdminTimeSlotsPage />} />
           </Route>
         </Routes>
       </AuthProvider>
