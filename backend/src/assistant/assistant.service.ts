@@ -35,6 +35,14 @@ type ScoredItem<T> = {
 const fallbackAnswer =
   'The business rules do not specify the answer to that question. Please check the services page, your bookings page, or contact the business directly.';
 
+const defaultOpenAiModel = 'gpt-5.6-luna';
+const defaultMaxOutputTokens = 300;
+const maxAllowedOutputTokens = 500;
+const allowedOpenAiModels = new Set([
+  'gpt-5.6-luna',
+  'gpt-5.4-nano',
+  'gpt-5.4-mini',
+]);
 const lowConfidenceThreshold = 0.35;
 const faqPreferenceMargin = 2;
 const stopWords = new Set([
@@ -82,13 +90,19 @@ const genericTokens = new Set([
 export class AssistantService {
   private readonly openai: OpenAI | null;
   private readonly model: string;
+  private readonly maxOutputTokens: number;
 
   constructor(
     private readonly configService: ConfigService,
     private readonly prisma: PrismaService,
   ) {
     const apiKey = this.configService.get<string>('OPENAI_API_KEY');
-    this.model = this.configService.get<string>('OPENAI_MODEL') ?? 'gpt-5.6';
+    this.model = this.getAllowedModel(
+      this.configService.get<string>('OPENAI_MODEL'),
+    );
+    this.maxOutputTokens = this.getMaxOutputTokens(
+      this.configService.get<string>('OPENAI_MAX_OUTPUT_TOKENS'),
+    );
     this.openai = apiKey ? new OpenAI({ apiKey }) : null;
   }
 
@@ -146,11 +160,12 @@ export class AssistantService {
     try {
       const response = await this.openai.responses.create({
         model: this.model,
+        max_output_tokens: this.maxOutputTokens,
         input: [
           {
             role: 'system',
             content:
-              'You are AI BookingMate Assistant. Answer only using the provided business rules and FAQ context. Do not invent policies. If the answer is not specified in the context, say that the business rules do not specify this and suggest contacting the business.',
+              'You are AI BookingMate Assistant. Answer only using the provided business rules and FAQ context. Do not invent policies. Answer in 2-4 short sentences unless the user asks for details. If the answer is not specified in the context, say that the business rules do not specify this and suggest contacting the business.',
           },
           {
             role: 'user',
@@ -392,6 +407,24 @@ export class AssistantService {
     }
 
     return token;
+  }
+
+  private getAllowedModel(configuredModel: string | undefined) {
+    if (configuredModel && allowedOpenAiModels.has(configuredModel)) {
+      return configuredModel;
+    }
+
+    return defaultOpenAiModel;
+  }
+
+  private getMaxOutputTokens(configuredValue: string | undefined) {
+    const parsedValue = Number(configuredValue);
+
+    if (!Number.isFinite(parsedValue) || parsedValue <= 0) {
+      return defaultMaxOutputTokens;
+    }
+
+    return Math.min(Math.floor(parsedValue), maxAllowedOutputTokens);
   }
 
   private scoreWeightedTokens({

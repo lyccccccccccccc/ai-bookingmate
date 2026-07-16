@@ -118,6 +118,21 @@ The backend adds a `BusinessRule` model, admin-only `/business-rules` endpoints,
 
 See `docs/day-14-openai-rule-grounded-assistant.md` for the rule model, OpenAI setup, fallback behavior, manual testing steps, and Day 14 acceptance criteria.
 
+## Day 15 OpenAI Cost Controls
+
+Day 15 adds backend cost controls for the OpenAI-powered assistant.
+
+Use these backend environment values:
+
+```env
+OPENAI_MODEL="gpt-5.6-luna"
+OPENAI_MAX_OUTPUT_TOKENS="300"
+```
+
+The backend enforces an allowed model list and caps `OPENAI_MAX_OUTPUT_TOKENS` at 500. The OpenAI API key remains backend-only and is never exposed to the frontend.
+
+See `docs/day-15-openai-cost-controls.md` for model allowlist behavior, output token limits, and manual testing steps.
+
 ## Planned Features
 
 - Customer booking workflow
