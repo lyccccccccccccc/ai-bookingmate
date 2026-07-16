@@ -79,6 +79,26 @@ async function upsertTimeSlot(
   });
 }
 
+async function upsertBusinessRule(data: {
+  title: string;
+  category: string;
+  content: string;
+  isActive: boolean;
+}) {
+  const existingRule = await prisma.businessRule.findFirst({
+    where: { title: data.title },
+  });
+
+  if (existingRule) {
+    return prisma.businessRule.update({
+      where: { id: existingRule.id },
+      data,
+    });
+  }
+
+  return prisma.businessRule.create({ data });
+}
+
 async function main() {
   const admin = await upsertUser('admin@example.com', 'Admin User', Role.ADMIN);
   const customer = await upsertUser(
@@ -126,10 +146,63 @@ async function main() {
     ),
   ];
 
+  const businessRules = await Promise.all([
+    upsertBusinessRule({
+      title: 'Cancellation policy',
+      category: 'cancellation',
+      content:
+        'Customers can cancel their own booking from the My Bookings page. Cancelling a booking changes the booking status to CANCELLED and makes the related time slot available again.',
+      isActive: true,
+    }),
+    upsertBusinessRule({
+      title: 'Refund policy',
+      category: 'refunds',
+      content:
+        'Refund handling is not automated in AI BookingMate. Customers should contact the business directly for refund questions.',
+      isActive: true,
+    }),
+    upsertBusinessRule({
+      title: 'Booking login requirement',
+      category: 'accounts',
+      content:
+        'Customers can browse services and available time slots without logging in, but they must log in or register before creating a booking.',
+      isActive: true,
+    }),
+    upsertBusinessRule({
+      title: 'Time slot availability rule',
+      category: 'availability',
+      content:
+        'Only AVAILABLE time slots appear on public service pages. BOOKED or BLOCKED time slots are hidden from customers.',
+      isActive: true,
+    }),
+    upsertBusinessRule({
+      title: 'Booking confirmation rule',
+      category: 'confirmation',
+      content:
+        'New bookings are created with PENDING status. An admin can confirm a pending booking or cancel it from the admin bookings page.',
+      isActive: true,
+    }),
+    upsertBusinessRule({
+      title: 'Late arrival rule',
+      category: 'late-arrival',
+      content:
+        'The current business rules do not define a specific late arrival grace period. Customers should contact the business if they expect to be late.',
+      isActive: true,
+    }),
+    upsertBusinessRule({
+      title: 'Pricing and duration rule',
+      category: 'pricing',
+      content:
+        'Each service has its own duration and optional price. Customers should check the service card for the current duration and price before booking.',
+      isActive: true,
+    }),
+  ]);
+
   console.log('Seed completed successfully');
   console.log(`Users ready: ${admin.email}, ${customer.email}`);
   console.log(`Services ready: ${privateLesson.name}, ${groupLesson.name}`);
   console.log(`Time slots ready: ${timeSlots.length}`);
+  console.log(`Business rules ready: ${businessRules.length}`);
 }
 
 main()

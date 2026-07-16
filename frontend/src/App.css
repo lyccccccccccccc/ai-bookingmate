@@ -182,8 +182,18 @@ select {
   padding: 11px 12px;
 }
 
+textarea {
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  color: #111827;
+  font: inherit;
+  padding: 11px 12px;
+  resize: vertical;
+}
+
 input:focus,
-select:focus {
+select:focus,
+textarea:focus {
   border-color: #2563eb;
   outline: 3px solid rgba(37, 99, 235, 0.16);
 }
@@ -538,6 +548,27 @@ dd {
   align-self: end;
 }
 
+.wide-field {
+  grid-column: 1 / -1;
+}
+
+.checkbox-label {
+  align-items: center;
+  flex-direction: row;
+}
+
+.checkbox-label input {
+  width: auto;
+}
+
+.business-rule-content {
+  background: #f9fafb;
+  border-left: 4px solid #2563eb;
+  color: #374151;
+  margin: 0;
+  padding: 12px 14px;
+}
+
 .section-heading-row {
   align-items: center;
   display: flex;
@@ -559,6 +590,89 @@ dd {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
+}
+
+.assistant-page {
+  display: grid;
+  gap: 18px;
+}
+
+.assistant-card {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06);
+  display: grid;
+  gap: 18px;
+  padding: 24px;
+}
+
+.suggested-questions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.question-chip {
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 999px;
+  color: #1d4ed8;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 700;
+  padding: 8px 12px;
+}
+
+.question-chip:disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.chat-thread {
+  display: grid;
+  gap: 12px;
+}
+
+.chat-message {
+  border-radius: 8px;
+  max-width: 78%;
+  padding: 12px 14px;
+}
+
+.chat-message p {
+  margin: 0;
+}
+
+.chat-message-user {
+  background: #2563eb;
+  color: #ffffff;
+  justify-self: end;
+}
+
+.chat-message-assistant {
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  color: #111827;
+  justify-self: start;
+}
+
+.assistant-metadata,
+.assistant-metadata p {
+  color: #6b7280;
+  font-size: 13px;
+  margin-top: 8px !important;
+}
+
+.assistant-form {
+  align-items: end;
+  display: grid;
+  gap: 12px;
+  grid-template-columns: 1fr auto;
+}
+
+.assistant-input-label {
+  width: 100%;
 }
 
 @media (max-width: 700px) {
@@ -623,5 +737,13 @@ dd {
   .section-heading-row {
     align-items: stretch;
     flex-direction: column;
+  }
+
+  .chat-message {
+    max-width: 100%;
+  }
+
+  .assistant-form {
+    grid-template-columns: 1fr;
   }
 }

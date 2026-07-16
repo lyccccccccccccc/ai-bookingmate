@@ -19,6 +19,7 @@ export function NavBar() {
       <nav className="nav-links" aria-label="Main navigation">
         <NavLink to="/">Home</NavLink>
         <NavLink to="/services">Services</NavLink>
+        <NavLink to="/assistant">Assistant</NavLink>
         {user ? (
           <>
             <NavLink to="/dashboard">Dashboard</NavLink>
@@ -26,6 +27,7 @@ export function NavBar() {
             {user.role === 'ADMIN' ? (
               <>
                 <NavLink to="/admin/bookings">Admin Bookings</NavLink>
+                <NavLink to="/admin/business-rules">Admin Rules</NavLink>
                 <NavLink to="/admin/services">Admin Services</NavLink>
                 <NavLink to="/admin/time-slots">Admin Time Slots</NavLink>
               </>

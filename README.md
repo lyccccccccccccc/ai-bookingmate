@@ -102,6 +102,22 @@ Admins can create, edit, and deactivate services, plus create, block, unblock, a
 
 See `docs/day-12-admin-services-time-slots.md` for admin service and time slot behavior, manual testing steps, and Day 12 acceptance criteria.
 
+## Day 13 FAQ Assistant
+
+Day 13 adds a customer FAQ assistant with a public backend endpoint at `POST /assistant/ask` and a frontend chat page at `/assistant`.
+
+The assistant uses a static backend knowledge base and deterministic keyword scoring, then can optionally call OpenAI from the backend when `OPENAI_API_KEY` is configured. If OpenAI is not configured, it falls back to the matched FAQ answer.
+
+See `docs/day-13-faq-assistant.md` for the retrieval approach, API response shape, frontend behavior, limitations, manual testing steps, and Day 13 acceptance criteria.
+
+## Day 14 OpenAI Rule-Grounded Assistant
+
+Day 14 upgrades the assistant so admins can manage business rules that ground customer support answers.
+
+The backend adds a `BusinessRule` model, admin-only `/business-rules` endpoints, default seed rules, and an OpenAI-backed assistant flow that uses matched rules as context. `OPENAI_API_KEY` stays in `backend/.env`, and the assistant falls back to rule-based retrieval when OpenAI is not configured.
+
+See `docs/day-14-openai-rule-grounded-assistant.md` for the rule model, OpenAI setup, fallback behavior, manual testing steps, and Day 14 acceptance criteria.
+
 ## Planned Features
 
 - Customer booking workflow
