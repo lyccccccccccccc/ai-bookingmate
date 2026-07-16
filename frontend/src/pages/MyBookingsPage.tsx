@@ -119,7 +119,7 @@ function BookingCard({
         <div>
           <h2>{booking.service.name}</h2>
           <p className="card-description">
-            {booking.service.durationMinutes} minutes ·{' '}
+            {booking.service.durationMinutes} minutes |{' '}
             {formatPrice(booking.service.priceCents)}
           </p>
         </div>

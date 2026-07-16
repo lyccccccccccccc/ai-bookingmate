@@ -133,6 +133,14 @@ The backend enforces an allowed model list and caps `OPENAI_MAX_OUTPUT_TOKENS` a
 
 See `docs/day-15-openai-cost-controls.md` for model allowlist behavior, output token limits, and manual testing steps.
 
+## Day 16 Frontend Polish
+
+Day 16 improves the React frontend UI so the app feels more demo-ready as a SaaS booking product.
+
+The polish pass keeps the existing CSS setup and does not add a UI framework. It improves the navbar, landing page, service cards, booking views, assistant chat, dashboard, forms, and admin pages.
+
+See `docs/day-16-frontend-polish.md` for the UI changes, testing checklist, and acceptance criteria.
+
 ## Planned Features
 
 - Customer booking workflow

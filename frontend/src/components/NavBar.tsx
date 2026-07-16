@@ -17,20 +17,24 @@ export function NavBar() {
       </Link>
 
       <nav className="nav-links" aria-label="Main navigation">
-        <NavLink to="/">Home</NavLink>
-        <NavLink to="/services">Services</NavLink>
-        <NavLink to="/assistant">Assistant</NavLink>
+        <span className="nav-group">
+          <NavLink to="/">Home</NavLink>
+          <NavLink to="/services">Services</NavLink>
+          <NavLink to="/assistant">Assistant</NavLink>
+        </span>
         {user ? (
           <>
-            <NavLink to="/dashboard">Dashboard</NavLink>
-            <NavLink to="/my-bookings">My Bookings</NavLink>
+            <span className="nav-group">
+              <NavLink to="/dashboard">Dashboard</NavLink>
+              <NavLink to="/my-bookings">My Bookings</NavLink>
+            </span>
             {user.role === 'ADMIN' ? (
-              <>
+              <span className="nav-group admin-nav-group" aria-label="Admin navigation">
                 <NavLink to="/admin/bookings">Admin Bookings</NavLink>
                 <NavLink to="/admin/business-rules">Admin Rules</NavLink>
                 <NavLink to="/admin/services">Admin Services</NavLink>
                 <NavLink to="/admin/time-slots">Admin Time Slots</NavLink>
-              </>
+              </span>
             ) : null}
             <button type="button" className="link-button" onClick={handleLogout}>
               Logout
@@ -38,8 +42,10 @@ export function NavBar() {
           </>
         ) : (
           <>
-            <NavLink to="/login">Login</NavLink>
-            <NavLink to="/register">Register</NavLink>
+            <span className="nav-group">
+              <NavLink to="/login">Login</NavLink>
+              <NavLink to="/register">Register</NavLink>
+            </span>
           </>
         )}
       </nav>

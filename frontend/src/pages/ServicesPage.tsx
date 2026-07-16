@@ -42,8 +42,8 @@ export function ServicesPage() {
         <p className="eyebrow">Browse services</p>
         <h1>Available Services</h1>
         <p className="lede">
-          Choose a service to see the available time slots. Booking starts in
-          Day 10.
+          Choose a service, review the duration and price, then pick an
+          available time that fits your schedule.
         </p>
       </section>
 
