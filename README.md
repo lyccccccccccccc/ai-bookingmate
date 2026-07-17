@@ -141,6 +141,14 @@ The polish pass keeps the existing CSS setup and does not add a UI framework. It
 
 See `docs/day-16-frontend-polish.md` for the UI changes, testing checklist, and acceptance criteria.
 
+## Automated Backend Testing
+
+The backend includes Jest unit tests and Supertest e2e tests for health, authentication, role checks, services, time slots, bookings, business rules, and assistant fallback behavior.
+
+E2E tests require a dedicated `DATABASE_URL_TEST` and will refuse to run against the normal development database. OpenAI calls are mocked in automated tests.
+
+See `docs/day-16-automated-testing.md` for safe test database setup, commands, covered workflows, and troubleshooting.
+
 ## Day 17 Advanced Frontend Layout
 
 Day 17 upgrades the frontend into a fuller demo-ready SaaS layout with wider page structures, two-column screens, side panels, summary cards, stat rows, richer empty states, and clearer product storytelling.
