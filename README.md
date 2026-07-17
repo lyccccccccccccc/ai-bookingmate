@@ -141,6 +141,26 @@ The polish pass keeps the existing CSS setup and does not add a UI framework. It
 
 See `docs/day-16-frontend-polish.md` for the UI changes, testing checklist, and acceptance criteria.
 
+## Day 17 Advanced Frontend Layout
+
+Day 17 upgrades the frontend into a fuller demo-ready SaaS layout with wider page structures, two-column screens, side panels, summary cards, stat rows, richer empty states, and clearer product storytelling.
+
+The polished pages include service browsing, bookings, assistant chat, dashboard, and the admin console, while still using plain React, TypeScript, and CSS.
+
+See `docs/day-17-advanced-frontend-layout.md` for the layout improvements and manual testing checklist.
+
+## Day 17b Layout Refinement
+
+Day 17b refines the advanced layout into a wider, more balanced booking SaaS experience. It standardizes desktop page width, typography, panel spacing, service and booking card rhythm, and responsive behavior, with a focused redesign of the assistant workspace.
+
+See `docs/day-17b-layout-refinement.md` for the visual issues addressed and the updated testing checklist.
+
+## Home, Services, And Assistant Presentation
+
+The customer-facing Home, Services, and Assistant pages use a wider SaaS-style presentation layout with a consistent typography scale, responsive card grids, and a chat-first assistant workspace. The implementation uses only the existing React and CSS setup.
+
+See `docs/day-17b-home-services-assistant-redesign.md` for the focused redesign notes and manual testing checklist.
+
 ## Planned Features
 
 - Customer booking workflow

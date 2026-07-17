@@ -159,46 +159,58 @@ export function AdminServicesPage() {
       {message ? <p className="success-message">{message}</p> : null}
       {error ? <p className="error-message">{error}</p> : null}
 
-      <section className="admin-form-section">
-        <h2>Create Service</h2>
-        <ServiceForm
-          form={form}
-          submitLabel={isSaving ? 'Saving...' : 'Create service'}
-          onSubmit={handleCreate}
-          onChange={setForm}
-          disabled={isSaving}
-        />
-      </section>
-
-      {editingService ? (
-        <section className="admin-form-section">
-          <div className="section-heading-row">
-            <h2>Edit Service</h2>
-            <button
-              className="button secondary"
-              type="button"
-              onClick={() => setEditingService(null)}
-            >
-              Cancel edit
-            </button>
+      <section className="two-column-layout admin-console-layout">
+        <aside className="side-panel">
+          <p className="eyebrow">Service catalog</p>
+          <h2>Control what customers can book.</h2>
+          <p>
+            Active services appear publicly. Deactivation keeps history intact
+            while removing the service from customer browsing.
+          </p>
+          <div className="side-panel-facts">
+            <span>{services.length} active services</span>
+            <span>Soft delete</span>
+            <span>Customer-facing</span>
           </div>
-          <ServiceForm
-            form={editForm}
-            submitLabel={isSaving ? 'Saving...' : 'Save changes'}
-            onSubmit={handleUpdate}
-            onChange={setEditForm}
-            disabled={isSaving}
-          />
-        </section>
-      ) : null}
+        </aside>
 
-      {isLoading ? <p className="state-message">Loading services...</p> : null}
-      {!isLoading && services.length === 0 ? (
-        <p className="state-message">No active services yet.</p>
-      ) : null}
+        <div className="admin-console-main">
+          <section className="admin-form-section">
+            <h2>{editingService ? 'Edit Service' : 'Create Service'}</h2>
+            {editingService ? (
+              <div className="section-heading-row">
+                <p className="card-description">Editing {editingService.name}</p>
+                <button
+                  className="button secondary"
+                  type="button"
+                  onClick={() => setEditingService(null)}
+                >
+                  Cancel edit
+                </button>
+              </div>
+            ) : null}
+            <ServiceForm
+              form={editingService ? editForm : form}
+              submitLabel={
+                isSaving
+                  ? 'Saving...'
+                  : editingService
+                    ? 'Save changes'
+                    : 'Create service'
+              }
+              onSubmit={editingService ? handleUpdate : handleCreate}
+              onChange={editingService ? setEditForm : setForm}
+              disabled={isSaving}
+            />
+          </section>
 
-      {!isLoading && services.length > 0 ? (
-        <section className="admin-list" aria-label="Active services">
+          {isLoading ? <p className="state-message">Loading services...</p> : null}
+          {!isLoading && services.length === 0 ? (
+            <p className="state-message">No active services yet.</p>
+          ) : null}
+
+          {!isLoading && services.length > 0 ? (
+            <section className="admin-list" aria-label="Active services">
           {services.map((service) => (
             <article className="admin-card" key={service.id}>
               <div className="booking-card-header">
@@ -248,8 +260,10 @@ export function AdminServicesPage() {
               </div>
             </article>
           ))}
-        </section>
-      ) : null}
+            </section>
+          ) : null}
+        </div>
+      </section>
     </main>
   )
 }

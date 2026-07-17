@@ -8,7 +8,13 @@ type ServiceCardProps = {
 export function ServiceCard({ service }: ServiceCardProps) {
   return (
     <article className="service-card">
-      <div>
+      <div className="service-card-top">
+        <span className="service-initial" aria-hidden="true">
+          {service.name.charAt(0).toUpperCase()}
+        </span>
+        <span className="meta-badge">Online booking</span>
+      </div>
+      <div className="service-card-content">
         <h2>{service.name}</h2>
         <p className="card-description">
           {service.description || 'No description provided yet.'}
@@ -16,12 +22,12 @@ export function ServiceCard({ service }: ServiceCardProps) {
       </div>
 
       <div className="service-meta">
-        <span>{service.durationMinutes} minutes</span>
+        <span>{service.durationMinutes} min</span>
         <span>{formatPrice(service.priceCents)}</span>
       </div>
 
-      <Link className="button primary" to={`/services/${service.id}`}>
-        View available times
+      <Link className="button primary service-card-action" to={`/services/${service.id}`}>
+        View available times <span aria-hidden="true">→</span>
       </Link>
     </article>
   )

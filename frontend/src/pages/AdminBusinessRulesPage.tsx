@@ -172,66 +172,78 @@ export function AdminBusinessRulesPage() {
       {message ? <p className="success-message">{message}</p> : null}
       {error ? <p className="error-message">{error}</p> : null}
 
-      <section className="admin-toolbar" aria-label="Business rule filters">
-        <label className="filter-label">
-          Category
-          <select
-            value={categoryFilter}
-            onChange={(event) => setCategoryFilter(event.target.value)}
-          >
-            <option value="">All categories</option>
-            {categories.map((category) => (
-              <option key={category} value={category}>
-                {category}
-              </option>
-            ))}
-          </select>
-        </label>
-      </section>
-
-      <section className="admin-form-section">
-        <h2>Create Business Rule</h2>
-        <RuleForm
-          form={form}
-          submitLabel={isSaving ? 'Saving...' : 'Create rule'}
-          onSubmit={handleCreate}
-          onChange={setForm}
-          disabled={isSaving}
-        />
-      </section>
-
-      {editingRule ? (
-        <section className="admin-form-section">
-          <div className="section-heading-row">
-            <h2>Edit Business Rule</h2>
-            <button
-              className="button secondary"
-              type="button"
-              onClick={() => setEditingRule(null)}
-            >
-              Cancel edit
-            </button>
+      <section className="two-column-layout admin-console-layout">
+        <aside className="side-panel">
+          <p className="eyebrow">Grounding context</p>
+          <h2>Rules shape assistant answers</h2>
+          <p>
+            Active rules become the assistant&apos;s business context. Keep them
+            short, specific, and customer-friendly.
+          </p>
+          <div className="side-panel-facts">
+            <span>{rules.length} rules shown</span>
+            <span>Soft deactivate</span>
+            <span>OpenAI grounded</span>
           </div>
-          <RuleForm
-            form={editForm}
-            submitLabel={isSaving ? 'Saving...' : 'Save changes'}
-            onSubmit={handleUpdate}
-            onChange={setEditForm}
-            disabled={isSaving}
-            showActive
-          />
-        </section>
-      ) : null}
+        </aside>
 
-      {isLoading ? <p className="state-message">Loading rules...</p> : null}
-      {!isLoading && rules.length === 0 ? (
-        <p className="state-message">No business rules match this filter.</p>
-      ) : null}
+        <div className="admin-console-main">
+          <section className="admin-form-section">
+            <h2>{editingRule ? 'Edit Business Rule' : 'Create Business Rule'}</h2>
+            {editingRule ? (
+              <div className="section-heading-row">
+                <p className="card-description">Editing {editingRule.title}</p>
+                <button
+                  className="button secondary"
+                  type="button"
+                  onClick={() => setEditingRule(null)}
+                >
+                  Cancel edit
+                </button>
+              </div>
+            ) : null}
+            <RuleForm
+              form={editingRule ? editForm : form}
+              submitLabel={
+                isSaving
+                  ? 'Saving...'
+                  : editingRule
+                    ? 'Save changes'
+                    : 'Create rule'
+              }
+              onSubmit={editingRule ? handleUpdate : handleCreate}
+              onChange={editingRule ? setEditForm : setForm}
+              disabled={isSaving}
+              showActive={Boolean(editingRule)}
+            />
+          </section>
 
-      {!isLoading && rules.length > 0 ? (
-        <section className="admin-list" aria-label="Business rules">
-          {rules.map((rule) => (
-            <article className="admin-card" key={rule.id}>
+          <section className="admin-toolbar" aria-label="Business rule filters">
+            <label className="filter-label">
+              Category
+              <select
+                value={categoryFilter}
+                onChange={(event) => setCategoryFilter(event.target.value)}
+              >
+                <option value="">All categories</option>
+                {categories.map((category) => (
+                  <option key={category} value={category}>
+                    {category}
+                  </option>
+                ))}
+              </select>
+            </label>
+          </section>
+
+          {isLoading ? <p className="state-message">Loading rules...</p> : null}
+          {!isLoading && rules.length === 0 ? (
+            <p className="state-message">No business rules match this filter.</p>
+          ) : null}
+
+          {!isLoading && rules.length > 0 ? (
+            <section className="admin-list" aria-label="Business rules">
+              {rules.map((rule) => (
+                <article className="admin-card" key={rule.id}>
               <div className="booking-card-header">
                 <div>
                   <h2>{rule.title}</h2>
@@ -269,9 +281,11 @@ export function AdminBusinessRulesPage() {
                 ) : null}
               </div>
             </article>
-          ))}
-        </section>
-      ) : null}
+              ))}
+            </section>
+          ) : null}
+        </div>
+      </section>
     </main>
   )
 }

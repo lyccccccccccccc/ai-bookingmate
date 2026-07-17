@@ -7,12 +7,23 @@ import {
 } from '../api/bookingsApi'
 import { formatPrice } from '../components/ServiceCard'
 import { formatDate, formatTime } from '../components/TimeSlotCard'
+import type { BookingStatus } from '../api/bookingsApi'
+
+type BookingFilter = 'ALL' | BookingStatus
+
+const bookingFilters: BookingFilter[] = [
+  'ALL',
+  'PENDING',
+  'CONFIRMED',
+  'CANCELLED',
+]
 
 export function MyBookingsPage() {
   const [bookings, setBookings] = useState<Booking[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState('')
   const [message, setMessage] = useState('')
+  const [filter, setFilter] = useState<BookingFilter>('ALL')
   const [cancellingBookingId, setCancellingBookingId] = useState<string | null>(
     null,
   )
@@ -67,6 +78,19 @@ export function MyBookingsPage() {
     }
   }
 
+  const filteredBookings =
+    filter === 'ALL'
+      ? bookings
+      : bookings.filter((booking) => booking.status === filter)
+  const pendingCount = bookings.filter((booking) => booking.status === 'PENDING')
+    .length
+  const confirmedCount = bookings.filter(
+    (booking) => booking.status === 'CONFIRMED',
+  ).length
+  const cancelledCount = bookings.filter(
+    (booking) => booking.status === 'CANCELLED',
+  ).length
+
   return (
     <main className="page my-bookings-page">
       <section className="page-header">
@@ -85,16 +109,56 @@ export function MyBookingsPage() {
       ) : null}
 
       {!isLoading && bookings.length > 0 ? (
-        <section className="bookings-list" aria-label="My bookings">
-          {bookings.map((booking) => (
-            <BookingCard
-              key={booking.id}
-              booking={booking}
-              isCancelling={cancellingBookingId === booking.id}
-              onCancel={() => void handleCancel(booking.id)}
-            />
-          ))}
-        </section>
+        <>
+          <section className="stat-grid" aria-label="Booking summary">
+            <article className="stat-card">
+              <strong>{bookings.length}</strong>
+              <span>Total bookings</span>
+            </article>
+            <article className="stat-card">
+              <strong>{pendingCount}</strong>
+              <span>Pending</span>
+            </article>
+            <article className="stat-card">
+              <strong>{confirmedCount}</strong>
+              <span>Confirmed</span>
+            </article>
+            <article className="stat-card">
+              <strong>{cancelledCount}</strong>
+              <span>Cancelled</span>
+            </article>
+          </section>
+
+          <section className="filter-tabs" aria-label="Booking status filter">
+            {bookingFilters.map((status) => (
+              <button
+                className={`filter-tab ${filter === status ? 'active' : ''}`}
+                key={status}
+                type="button"
+                onClick={() => setFilter(status)}
+              >
+                {status}
+              </button>
+            ))}
+          </section>
+
+          {filteredBookings.length === 0 ? (
+            <p className="state-message">No bookings match this filter.</p>
+          ) : null}
+
+          {filteredBookings.length > 0 ? (
+            <section className="bookings-list" aria-label="My bookings">
+              {filteredBookings.map((booking) => (
+                <BookingCard
+                  key={booking.id}
+                  booking={booking}
+                  isCancelling={cancellingBookingId === booking.id}
+                  onCancel={() => void handleCancel(booking.id)}
+                />
+              ))}
+            </section>
+          ) : null}
+        </>
       ) : null}
     </main>
   )

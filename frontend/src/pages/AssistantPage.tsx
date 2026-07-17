@@ -31,6 +31,10 @@ export function AssistantPage() {
   const [question, setQuestion] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
+  const latestMetadata = [...messages]
+    .reverse()
+    .find((message) => message.role === 'assistant' && message.metadata)
+    ?.metadata
 
   async function submitQuestion(questionText: string) {
     const trimmedQuestion = questionText.trim()
@@ -90,61 +94,124 @@ export function AssistantPage() {
           Get quick answers about services, bookings, time slots, and account
           rules.
         </p>
+        <span className="assistant-mode-indicator">
+          {latestMetadata
+            ? latestMetadata.mode === 'openai'
+              ? 'OpenAI mode'
+              : 'Retrieval fallback'
+            : 'Mode shown after your first answer'}
+        </span>
       </section>
 
-      <section className="assistant-card" aria-label="FAQ assistant chat">
-        <div className="suggested-questions" aria-label="Suggested questions">
-          {suggestedQuestions.map((suggestedQuestion) => (
+      <section className="two-column-layout assistant-layout">
+        <aside className="assistant-sidebar">
+          <section className="assistant-sidebar-card">
+            <p className="eyebrow">Grounded answers</p>
+            <h2>How answers stay reliable</h2>
+            <p>
+              Active admin business rules are retrieved first. OpenAI can
+              synthesize that context, while fallback mode shows the strongest
+              supported match.
+            </p>
+          </section>
+          <section className="assistant-sidebar-card assistant-mode-card">
+            <p className="eyebrow">Current mode</p>
+            <strong>
+              {latestMetadata
+                ? latestMetadata.mode === 'openai'
+                  ? 'OpenAI enabled'
+                  : 'Retrieval fallback'
+                : 'Waiting for a question'}
+            </strong>
+            <p>Each answer shows its confidence and matched rule or FAQ source.</p>
+          </section>
+          <section className="assistant-sidebar-card try-asking">
+            <h3>Try asking</h3>
+            {suggestedQuestions.slice(0, 4).map((suggestedQuestion) => (
+              <button
+                className="question-chip"
+                disabled={isLoading}
+                key={suggestedQuestion}
+                type="button"
+                onClick={() => void submitQuestion(suggestedQuestion)}
+              >
+                {suggestedQuestion}
+              </button>
+            ))}
+          </section>
+          <section className="assistant-sidebar-card supported-topics">
+            <h3>Supported topics</h3>
+            <div className="side-panel-facts">
+              <span>Booking</span><span>Cancellations</span><span>Time slots</span>
+              <span>Services</span><span>Account access</span><span>Policies</span>
+            </div>
+          </section>
+        </aside>
+
+        <div className="assistant-card" aria-label="FAQ assistant chat">
+          <div className="suggested-questions" aria-label="Suggested questions">
+            {suggestedQuestions.map((suggestedQuestion) => (
+              <button
+                className="question-chip"
+                disabled={isLoading}
+                key={suggestedQuestion}
+                type="button"
+                onClick={() => void submitQuestion(suggestedQuestion)}
+              >
+                {suggestedQuestion}
+              </button>
+            ))}
+          </div>
+
+          <div className="chat-thread">
+            {messages.length === 1 ? (
+              <div className="assistant-empty-state">
+                <span className="assistant-orb" aria-hidden="true">AI</span>
+                <div>
+                  <strong>What can I help with?</strong>
+                  <p>Ask about booking, cancellations, available time slots, or business policies.</p>
+                </div>
+              </div>
+            ) : null}
+            {messages.map((message) => (
+              <article
+                className={`chat-message chat-message-${message.role}`}
+                key={message.id}
+              >
+                <p>{message.text}</p>
+                {message.metadata ? (
+                  <AssistantMetadata metadata={message.metadata} />
+                ) : null}
+              </article>
+            ))}
+
+            {isLoading ? (
+              <p className="state-message">Assistant is thinking...</p>
+            ) : null}
+          </div>
+
+          {error ? <p className="error-message">{error}</p> : null}
+
+          <form className="assistant-form" onSubmit={handleSubmit}>
+            <label className="assistant-input-label">
+              Ask a question
+              <input
+                maxLength={500}
+                placeholder="How do I cancel my booking?"
+                value={question}
+                onChange={(event) => setQuestion(event.target.value)}
+              />
+            </label>
             <button
-              className="question-chip"
-              disabled={isLoading}
-              key={suggestedQuestion}
-              type="button"
-              onClick={() => void submitQuestion(suggestedQuestion)}
+              className="button primary"
+              disabled={isLoading || question.trim().length === 0}
+              type="submit"
             >
-              {suggestedQuestion}
+              {isLoading ? 'Asking...' : 'Ask'}
             </button>
-          ))}
+          </form>
         </div>
 
-        <div className="chat-thread">
-          {messages.map((message) => (
-            <article
-              className={`chat-message chat-message-${message.role}`}
-              key={message.id}
-            >
-              <p>{message.text}</p>
-              {message.metadata ? (
-                <AssistantMetadata metadata={message.metadata} />
-              ) : null}
-            </article>
-          ))}
-
-          {isLoading ? (
-            <p className="state-message">Assistant is thinking...</p>
-          ) : null}
-        </div>
-
-        {error ? <p className="error-message">{error}</p> : null}
-
-        <form className="assistant-form" onSubmit={handleSubmit}>
-          <label className="assistant-input-label">
-            Ask a question
-            <input
-              maxLength={500}
-              placeholder="How do I cancel my booking?"
-              value={question}
-              onChange={(event) => setQuestion(event.target.value)}
-            />
-          </label>
-          <button
-            className="button primary"
-            disabled={isLoading || question.trim().length === 0}
-            type="submit"
-          >
-            {isLoading ? 'Asking...' : 'Ask'}
-          </button>
-        </form>
       </section>
     </main>
   )
@@ -156,14 +223,14 @@ function AssistantMetadata({
   metadata: NonNullable<ChatMessage['metadata']>
 }) {
   return (
-    <div className="assistant-metadata">
-      <p>
-        Mode: {metadata.mode === 'openai' ? 'OpenAI' : 'retrieval fallback'} |
-        Confidence: {Math.round(metadata.confidence * 100)}%
-      </p>
+    <div className="assistant-metadata" aria-label="Answer source details">
+      <div className="assistant-metadata-row">
+        <span>Mode: {metadata.mode === 'openai' ? 'OpenAI' : 'Fallback'}</span>
+        <span>Confidence: {Math.round(metadata.confidence * 100)}%</span>
+      </div>
 
       {metadata.mode === 'retrieval_fallback' ? (
-        <p>OpenAI is not configured, showing rule-based fallback.</p>
+        <p>Rule-based fallback is shown because OpenAI is not configured.</p>
       ) : null}
 
       {metadata.matchedRules.length > 0 ? (

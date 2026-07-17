@@ -97,56 +97,75 @@ export function ServiceDetailPage() {
 
       {!isLoading && !error && service ? (
         <>
-          <section className="service-detail-panel">
-            <p className="eyebrow">Service details</p>
-            <h1>{service.name}</h1>
-            <p className="lede">
-              {service.description || 'No description provided yet.'}
-            </p>
-            <div className="service-meta detail-meta">
-              <span>{service.durationMinutes} minutes</span>
-              <span>{formatPrice(service.priceCents)}</span>
-            </div>
-          </section>
-
-          <section className="time-slots-section">
-            <div className="section-heading">
-              <h2>Available time slots</h2>
-              <p>Choose an available time to create your booking.</p>
-            </div>
-
-            {timeSlots.length === 0 ? (
-              <p className="state-message">
-                No available time slots for this service yet.
+          <section className="two-column-layout service-booking-layout">
+            <aside className="service-detail-panel side-panel">
+              <p className="eyebrow">Service details</p>
+              <h1>{service.name}</h1>
+              <p className="lede">
+                {service.description || 'No description provided yet.'}
               </p>
-            ) : (
-              <div className="time-slots-list">
-                {timeSlots.map((timeSlot) => (
-                  <TimeSlotCard
-                    key={timeSlot.id}
-                    timeSlot={timeSlot}
-                    action={
-                      user ? (
-                        <button
-                          className="button primary"
-                          type="button"
-                          onClick={() => void handleBookTimeSlot(timeSlot.id)}
-                          disabled={bookingTimeSlotId === timeSlot.id}
-                        >
-                          {bookingTimeSlotId === timeSlot.id
-                            ? 'Booking...'
-                            : 'Book this time'}
-                        </button>
-                      ) : (
-                        <Link className="button secondary" to="/login">
-                          Log in to book
-                        </Link>
-                      )
-                    }
-                  />
-                ))}
+              <div className="service-meta detail-meta">
+                <span>{service.durationMinutes} minutes</span>
+                <span>{formatPrice(service.priceCents)}</span>
               </div>
-            )}
+              <div className="helper-panel">
+                <h2>Before you book</h2>
+                <p>
+                  Choose an available time slot. You will be asked to log in or
+                  register before creating a booking.
+                </p>
+              </div>
+            </aside>
+
+            <section className="time-slots-section content-panel">
+              <div className="section-heading">
+                <div>
+                  <p className="eyebrow">Availability</p>
+                  <h2>Available time slots</h2>
+                  <p>Choose an available time to create your booking.</p>
+                </div>
+              </div>
+
+              {!user ? (
+                <p className="state-message">
+                  Log in or register when you are ready to book a time.
+                </p>
+              ) : null}
+
+              {timeSlots.length === 0 ? (
+                <p className="state-message">
+                  No available time slots for this service yet. Please check
+                  another service or come back later.
+                </p>
+              ) : (
+                <div className="time-slots-list">
+                  {timeSlots.map((timeSlot) => (
+                    <TimeSlotCard
+                      key={timeSlot.id}
+                      timeSlot={timeSlot}
+                      action={
+                        user ? (
+                          <button
+                            className="button primary"
+                            type="button"
+                            onClick={() => void handleBookTimeSlot(timeSlot.id)}
+                            disabled={bookingTimeSlotId === timeSlot.id}
+                          >
+                            {bookingTimeSlotId === timeSlot.id
+                              ? 'Booking...'
+                              : 'Book this time'}
+                          </button>
+                        ) : (
+                          <Link className="button secondary" to="/login">
+                            Log in to book
+                          </Link>
+                        )
+                      }
+                    />
+                  ))}
+                </div>
+              )}
+            </section>
           </section>
         </>
       ) : null}
