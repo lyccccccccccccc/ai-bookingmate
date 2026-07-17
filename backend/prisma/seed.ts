@@ -33,25 +33,70 @@ async function upsertUser(email: string, name: string, role: Role) {
   });
 }
 
-async function upsertService(data: {
+type ServiceSeedData = {
   name: string;
   description: string;
   durationMinutes: number;
   priceCents: number;
   isActive: boolean;
-}) {
-  const existingService = await prisma.service.findFirst({
-    where: { name: data.name },
+};
+
+async function archiveService(id: string) {
+  return prisma.service.update({
+    where: { id },
+    data: {
+      name: `Archived service ${id.slice(-8)}`,
+      description: 'Previously offered service.',
+      isActive: false,
+    },
+  });
+}
+
+async function ensurePolishedService(
+  data: ServiceSeedData,
+  legacyNames: string[] = [],
+) {
+  const matchingServices = await prisma.service.findMany({
+    where: { name: { in: [data.name, ...legacyNames] } },
+    orderBy: { createdAt: 'asc' },
   });
 
-  if (existingService) {
-    return prisma.service.update({
-      where: { id: existingService.id },
-      data,
-    });
+  const existingService =
+    matchingServices.find((service) => service.name === data.name) ??
+    matchingServices[0];
+
+  if (!existingService) {
+    return prisma.service.create({ data });
   }
 
-  return prisma.service.create({ data });
+  await Promise.all(
+    matchingServices
+      .filter((service) => service.id !== existingService.id)
+      .map((service) => archiveService(service.id)),
+  );
+
+  return prisma.service.update({
+    where: { id: existingService.id },
+    data,
+  });
+}
+
+async function archiveDevelopmentServices(excludedServiceIds: string[]) {
+  const services = await prisma.service.findMany({
+    select: { id: true, name: true },
+  });
+  const developmentNamePattern = /\btest\b|day\s*\d+|testing|booking test/i;
+  const developmentServices = services.filter(
+    (service) =>
+      !excludedServiceIds.includes(service.id) &&
+      developmentNamePattern.test(service.name),
+  );
+
+  await Promise.all(
+    developmentServices.map((service) => archiveService(service.id)),
+  );
+
+  return developmentServices.length;
 }
 
 async function upsertTimeSlot(
@@ -68,7 +113,6 @@ async function upsertTimeSlot(
     },
     update: {
       endAt: new Date(endAt),
-      status: TimeSlotStatus.AVAILABLE,
     },
     create: {
       serviceId,
@@ -100,47 +144,104 @@ async function upsertBusinessRule(data: {
 }
 
 async function main() {
-  const admin = await upsertUser('admin@example.com', 'Admin User', Role.ADMIN);
+  const admin = await upsertUser(
+    'admin@example.com',
+    'Court Manager',
+    Role.ADMIN,
+  );
   const customer = await upsertUser(
     'customer.seed@example.com',
-    'Seed Customer',
+    'Jordan Taylor',
     Role.CUSTOMER,
   );
 
-  const privateLesson = await upsertService({
-    name: 'Private Tennis Lesson',
-    description: 'One-on-one tennis coaching session',
+  const privateCoaching = await ensurePolishedService(
+    {
+      name: 'Private Tennis Coaching',
+      description:
+        'One-on-one coaching tailored to your level, technique, and match-play goals.',
+      durationMinutes: 60,
+      priceCents: 8000,
+      isActive: true,
+    },
+    ['Private Tennis Lesson'],
+  );
+
+  const juniorLesson = await ensurePolishedService({
+    name: 'Junior Private Tennis Lesson',
+    description:
+      'A personalised junior lesson focused on technique, movement, confidence, and rally skills.',
+    durationMinutes: 60,
+    priceCents: 7000,
+    isActive: true,
+  });
+
+  const adultLesson = await ensurePolishedService({
+    name: 'Adult Private Tennis Lesson',
+    description:
+      'Individual coaching for adults covering stroke development, movement, and point construction.',
     durationMinutes: 60,
     priceCents: 8000,
     isActive: true,
   });
 
-  const groupLesson = await upsertService({
-    name: 'Group Tennis Lesson',
-    description: 'Small group coaching session',
-    durationMinutes: 90,
-    priceCents: 5000,
-    isActive: true,
-  });
+  const groupClass = await ensurePolishedService(
+    {
+      name: 'Small Group Tennis Class',
+      description:
+        'A structured small-group session combining drills, technique, and point play.',
+      durationMinutes: 90,
+      priceCents: 5000,
+      isActive: true,
+    },
+    ['Group Tennis Lesson'],
+  );
+
+  const archivedDevelopmentServices = await archiveDevelopmentServices([
+    privateCoaching.id,
+    juniorLesson.id,
+    adultLesson.id,
+    groupClass.id,
+  ]);
 
   const timeSlots = [
     await upsertTimeSlot(
-      privateLesson.id,
+      privateCoaching.id,
       '2026-08-01T09:00:00.000Z',
       '2026-08-01T10:00:00.000Z',
     ),
     await upsertTimeSlot(
-      privateLesson.id,
+      privateCoaching.id,
       '2026-08-01T10:30:00.000Z',
       '2026-08-01T11:30:00.000Z',
     ),
     await upsertTimeSlot(
-      groupLesson.id,
-      '2026-08-02T09:00:00.000Z',
-      '2026-08-02T10:30:00.000Z',
+      juniorLesson.id,
+      '2026-08-01T13:00:00.000Z',
+      '2026-08-01T14:00:00.000Z',
     ),
     await upsertTimeSlot(
-      groupLesson.id,
+      juniorLesson.id,
+      '2026-08-01T14:30:00.000Z',
+      '2026-08-01T15:30:00.000Z',
+    ),
+    await upsertTimeSlot(
+      adultLesson.id,
+      '2026-08-02T09:00:00.000Z',
+      '2026-08-02T10:00:00.000Z',
+    ),
+    await upsertTimeSlot(
+      adultLesson.id,
+      '2026-08-02T10:30:00.000Z',
+      '2026-08-02T11:30:00.000Z',
+    ),
+    await upsertTimeSlot(
+      groupClass.id,
+      '2026-08-02T13:00:00.000Z',
+      '2026-08-02T14:30:00.000Z',
+    ),
+    await upsertTimeSlot(
+      groupClass.id,
       '2026-08-02T11:00:00.000Z',
       '2026-08-02T12:30:00.000Z',
     ),
@@ -200,8 +301,11 @@ async function main() {
 
   console.log('Seed completed successfully');
   console.log(`Users ready: ${admin.email}, ${customer.email}`);
-  console.log(`Services ready: ${privateLesson.name}, ${groupLesson.name}`);
+  console.log(
+    `Services ready: ${privateCoaching.name}, ${juniorLesson.name}, ${adultLesson.name}, ${groupClass.name}`,
+  );
   console.log(`Time slots ready: ${timeSlots.length}`);
+  console.log(`Development services archived: ${archivedDevelopmentServices}`);
   console.log(`Business rules ready: ${businessRules.length}`);
 }
 

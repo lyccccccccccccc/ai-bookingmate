@@ -32,8 +32,8 @@ export function formatPrice(priceCents: number | null) {
     return 'Price on request'
   }
 
-  return new Intl.NumberFormat(undefined, {
+  return new Intl.NumberFormat('en-US', {
     style: 'currency',
-    currency: 'USD',
+    currency: 'AUD',
   }).format(priceCents / 100)
 }

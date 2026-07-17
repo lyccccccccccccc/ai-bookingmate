@@ -27,7 +27,7 @@ export function TimeSlotCard({ timeSlot, action }: TimeSlotCardProps) {
 }
 
 export function formatDate(date: Date) {
-  return new Intl.DateTimeFormat(undefined, {
+  return new Intl.DateTimeFormat('en-GB', {
     weekday: 'short',
     month: 'short',
     day: 'numeric',
@@ -36,7 +36,7 @@ export function formatDate(date: Date) {
 }
 
 export function formatTime(date: Date) {
-  return new Intl.DateTimeFormat(undefined, {
+  return new Intl.DateTimeFormat('en-AU', {
     hour: 'numeric',
     minute: '2-digit',
   }).format(date)

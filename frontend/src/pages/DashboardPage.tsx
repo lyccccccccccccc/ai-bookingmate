@@ -57,7 +57,7 @@ export function DashboardPage() {
             onClick={checkAdminAccess}
             disabled={isCheckingAdmin}
           >
-            {isCheckingAdmin ? 'Checking...' : 'Test admin access'}
+            {isCheckingAdmin ? 'Checking...' : 'Verify admin access'}
           </button>
 
           {adminMessage ? <p className="success-message">{adminMessage}</p> : null}

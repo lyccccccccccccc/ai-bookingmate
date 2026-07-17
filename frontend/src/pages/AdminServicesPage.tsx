@@ -7,6 +7,7 @@ import {
   type ServiceFormData,
 } from '../api/adminServicesApi'
 import { getServices, type Service } from '../api/servicesApi'
+import { formatDate } from '../components/TimeSlotCard'
 
 type ServiceFormState = {
   name: string
@@ -223,7 +224,7 @@ export function AdminServicesPage() {
                 </div>
                 <div>
                   <dt>Created</dt>
-                  <dd>{new Date(service.createdAt).toLocaleDateString()}</dd>
+                  <dd>{formatDate(new Date(service.createdAt))}</dd>
                 </div>
               </div>
 
@@ -337,9 +338,9 @@ function formatPrice(priceCents: number | null) {
     return 'No price set'
   }
 
-  return new Intl.NumberFormat(undefined, {
+  return new Intl.NumberFormat('en-US', {
     style: 'currency',
-    currency: 'USD',
+    currency: 'AUD',
   }).format(priceCents / 100)
 }
 
