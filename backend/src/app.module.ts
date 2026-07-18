@@ -9,11 +9,13 @@ import { AppService } from './app.service';
 import { PrismaModule } from './prisma/prisma.module';
 import { ServicesModule } from './services/services.module';
 import { TimeSlotsModule } from './time-slots/time-slots.module';
+import { validateEnvironment } from './config/environment.validation';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
+      validate: validateEnvironment,
     }),
     PrismaModule,
     AuthModule,

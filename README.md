@@ -66,7 +66,7 @@ See `docs/day-07-seed-swagger.md` for Swagger usage, seed details, manual test c
 
 Day 8 adds React authentication pages, JWT session handling, protected dashboard routing, and backend CORS support for the Vite frontend.
 
-Frontend auth uses `VITE_API_BASE_URL=http://localhost:3000` and stores the JWT access token in localStorage under `accessToken`.
+Frontend auth uses `VITE_API_URL=http://localhost:3000` and stores the JWT access token in localStorage under `accessToken`.
 
 See `docs/day-08-frontend-auth.md` for the auth flow, routes, manual testing steps, and Day 8 acceptance criteria.
 
@@ -148,6 +148,22 @@ The backend includes Jest unit tests and Supertest e2e tests for health, authent
 E2E tests require a dedicated `DATABASE_URL_TEST` and will refuse to run against the normal development database. OpenAI calls are mocked in automated tests.
 
 See `docs/day-16-automated-testing.md` for safe test database setup, commands, covered workflows, and troubleshooting.
+
+## Day 18 Production Deployment
+
+Day 18 adds production-focused environment validation, restricted CORS, a database-aware health endpoint, Docker builds, and a safe Prisma migration strategy.
+
+The production Compose stack runs PostgreSQL, a one-off migration service, the NestJS backend, and the React frontend:
+
+```cmd
+docker compose -f docker-compose.production.yml up --build
+```
+
+Set production secrets outside Git. The backend requires `DATABASE_URL`, `JWT_SECRET`, and `FRONTEND_URL` when `NODE_ENV=production`. The frontend reads its public backend address from `VITE_API_URL`; it never receives OpenAI or database secrets.
+
+Use `npx prisma migrate deploy` for production migrations. `npm run seed` is optional demo data only and should not run as part of a normal production deployment.
+
+Health monitoring is available at `GET /health`. See `docs/day-18-production-deployment.md` for deployment architecture, required variables, Docker commands, security checks, and troubleshooting.
 
 ## Day 17 Advanced Frontend Layout
 

@@ -103,7 +103,13 @@ export class AssistantService {
     this.maxOutputTokens = this.getMaxOutputTokens(
       this.configService.get<string>('OPENAI_MAX_OUTPUT_TOKENS'),
     );
-    this.openai = apiKey ? new OpenAI({ apiKey }) : null;
+    this.openai = apiKey
+      ? new OpenAI({
+          apiKey,
+          timeout: 10_000,
+          maxRetries: 0,
+        })
+      : null;
   }
 
   async answerQuestion(question: string): Promise<AssistantAnswer> {
@@ -295,7 +301,10 @@ export class AssistantService {
     }
 
     const coverage = match.matchedTokens.size / match.questionTokenCount;
-    const scoreBoost = Math.min(match.score / (match.questionTokenCount * 4), 1);
+    const scoreBoost = Math.min(
+      match.score / (match.questionTokenCount * 4),
+      1,
+    );
 
     return Number(Math.min((coverage + scoreBoost) / 2, 1).toFixed(2));
   }
@@ -323,7 +332,9 @@ export class AssistantService {
         answer: faqEntry.answer,
         mode: 'retrieval_fallback',
         confidence,
-        matchedRules: matchedRules.map((match) => this.toMatchedRule(match.item)),
+        matchedRules: matchedRules.map((match) =>
+          this.toMatchedRule(match.item),
+        ),
         matchedFaq,
       };
     }
@@ -333,7 +344,9 @@ export class AssistantService {
         answer: bestRule.content,
         mode: 'retrieval_fallback',
         confidence,
-        matchedRules: matchedRules.map((match) => this.toMatchedRule(match.item)),
+        matchedRules: matchedRules.map((match) =>
+          this.toMatchedRule(match.item),
+        ),
         matchedFaq,
       };
     }
