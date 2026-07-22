@@ -103,6 +103,7 @@ async function upsertTimeSlot(
   serviceId: string,
   startAt: string,
   endAt: string,
+  capacity = 1,
 ) {
   return prisma.timeSlot.upsert({
     where: {
@@ -113,12 +114,14 @@ async function upsertTimeSlot(
     },
     update: {
       endAt: new Date(endAt),
+      capacity,
     },
     create: {
       serviceId,
       startAt: new Date(startAt),
       endAt: new Date(endAt),
       status: TimeSlotStatus.AVAILABLE,
+      capacity,
     },
   });
 }
@@ -239,11 +242,13 @@ async function main() {
       groupClass.id,
       '2026-08-02T13:00:00.000Z',
       '2026-08-02T14:30:00.000Z',
+      8,
     ),
     await upsertTimeSlot(
       groupClass.id,
       '2026-08-02T11:00:00.000Z',
       '2026-08-02T12:30:00.000Z',
+      8,
     ),
   ];
 

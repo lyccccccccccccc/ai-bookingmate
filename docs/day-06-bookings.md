@@ -16,28 +16,23 @@ Each booking links three important records:
 
 This makes it easy to answer questions such as "who booked this?", "what service did they book?", and "when is the appointment?"
 
-## Why Booking Updates TimeSlot To BOOKED
+## Capacity-Based Availability
 
-Creating a booking must also mark the related time slot as `BOOKED`. Without that status change, the same slot would still appear as available and another customer could try to book it.
+Day 19 supersedes the original single-booking status design. Creating a booking does not mark the slot `BOOKED`; active `PENDING` and `CONFIRMED` bookings are counted against the slot capacity instead. A capacity-one private slot behaves as before, while a group slot can accept multiple customers.
 
 ## Why A Transaction Is Used
 
-Booking creation changes two related things:
+Booking creation now performs these related checks and changes:
 
-1. The time slot changes from `AVAILABLE` to `BOOKED`.
-2. A booking record is created.
+1. A transaction advisory lock serializes capacity operations for the time slot.
+2. The backend checks blocked status, active capacity, and any duplicate active booking by the customer.
+3. A booking record is created only when a place remains.
 
 A transaction keeps those changes together. If one step fails, the other step is not left half-finished.
 
 ## Double-Booking Prevention
 
-The booking flow updates the time slot with this condition:
-
-```text
-id = timeSlotId AND status = AVAILABLE
-```
-
-If two requests try to book the same slot at the same time, only one request can update the slot from `AVAILABLE` to `BOOKED`. The other request sees an update count of `0` and receives `409 Conflict`.
+If two requests try to book the same slot at the same time, the transaction advisory lock makes their capacity checks run one at a time. Requests beyond capacity receive `409 Conflict`.
 
 ## Customer Endpoints
 

@@ -13,7 +13,10 @@ export type Booking = {
   createdAt: string
   updatedAt: string
   service: Pick<Service, 'id' | 'name' | 'durationMinutes' | 'priceCents'>
-  timeSlot: Pick<TimeSlot, 'id' | 'serviceId' | 'startAt' | 'endAt' | 'status'>
+  timeSlot: Pick<
+    TimeSlot,
+    'id' | 'serviceId' | 'startAt' | 'endAt' | 'status' | 'capacity'
+  >
 }
 
 export async function createBooking(timeSlotId: string, notes?: string) {

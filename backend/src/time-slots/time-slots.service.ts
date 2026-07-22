@@ -4,10 +4,15 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { Prisma, TimeSlotStatus } from '@prisma/client';
+import { BookingStatus, Prisma, TimeSlotStatus } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateTimeSlotDto } from './dto/create-time-slot.dto';
+import { UpdateTimeSlotCapacityDto } from './dto/update-time-slot-capacity.dto';
 import { UpdateTimeSlotStatusDto } from './dto/update-time-slot-status.dto';
+
+const activeBookingWhere = {
+  status: { in: [BookingStatus.PENDING, BookingStatus.CONFIRMED] },
+} satisfies Prisma.BookingWhereInput;
 
 const timeSlotSelect = {
   id: true,
@@ -15,8 +20,14 @@ const timeSlotSelect = {
   startAt: true,
   endAt: true,
   status: true,
+  capacity: true,
   createdAt: true,
   updatedAt: true,
+  _count: {
+    select: {
+      bookings: { where: activeBookingWhere },
+    },
+  },
 } satisfies Prisma.TimeSlotSelect;
 
 const adminTimeSlotSelect = {
@@ -30,6 +41,14 @@ const adminTimeSlotSelect = {
   },
 } satisfies Prisma.TimeSlotSelect;
 
+type TimeSlotWithCapacity = Prisma.TimeSlotGetPayload<{
+  select: typeof timeSlotSelect;
+}>;
+
+type AdminTimeSlotWithCapacity = Prisma.TimeSlotGetPayload<{
+  select: typeof adminTimeSlotSelect;
+}>;
+
 type AdminTimeSlotFilters = {
   serviceId?: string;
   status?: TimeSlotStatus;
@@ -41,6 +60,12 @@ export class TimeSlotsService {
 
   async create(dto: CreateTimeSlotDto) {
     await this.findActiveServiceOrThrow(dto.serviceId);
+
+    if (dto.status === TimeSlotStatus.BOOKED) {
+      throw new BadRequestException(
+        'BOOKED is managed by booking capacity and cannot be set manually',
+      );
+    }
 
     const startAt = new Date(dto.startAt);
     const endAt = new Date(dto.endAt);
@@ -60,15 +85,18 @@ export class TimeSlotsService {
     }
 
     try {
-      return await this.prisma.timeSlot.create({
+      const timeSlot = await this.prisma.timeSlot.create({
         data: {
           serviceId: dto.serviceId,
           startAt,
           endAt,
           status: dto.status ?? TimeSlotStatus.AVAILABLE,
+          capacity: dto.capacity ?? 1,
         },
         select: timeSlotSelect,
       });
+
+      return this.toCapacityResponse(timeSlot);
     } catch (error) {
       if (this.isUniqueConstraintError(error)) {
         throw new ConflictException(
@@ -83,7 +111,7 @@ export class TimeSlotsService {
   async findAvailableByService(serviceId: string) {
     await this.findActiveServiceOrThrow(serviceId);
 
-    return this.prisma.timeSlot.findMany({
+    const timeSlots = await this.prisma.timeSlot.findMany({
       where: {
         serviceId,
         status: TimeSlotStatus.AVAILABLE,
@@ -91,10 +119,14 @@ export class TimeSlotsService {
       orderBy: { startAt: 'asc' },
       select: timeSlotSelect,
     });
+
+    return timeSlots
+      .map((timeSlot) => this.toCapacityResponse(timeSlot))
+      .filter((timeSlot) => !timeSlot.isFull);
   }
 
-  findAllForAdmin(filters: AdminTimeSlotFilters) {
-    return this.prisma.timeSlot.findMany({
+  async findAllForAdmin(filters: AdminTimeSlotFilters) {
+    const timeSlots = await this.prisma.timeSlot.findMany({
       where: {
         serviceId: filters.serviceId,
         status: filters.status,
@@ -102,6 +134,8 @@ export class TimeSlotsService {
       orderBy: { startAt: 'asc' },
       select: adminTimeSlotSelect,
     });
+
+    return timeSlots.map((timeSlot) => this.toCapacityResponse(timeSlot));
   }
 
   async findOne(id: string) {
@@ -114,17 +148,50 @@ export class TimeSlotsService {
       throw new NotFoundException('Time slot not found');
     }
 
-    return timeSlot;
+    return this.toCapacityResponse(timeSlot);
   }
 
   async updateStatus(id: string, dto: UpdateTimeSlotStatusDto) {
-    await this.findOne(id);
+    return this.prisma.$transaction(
+      async (tx) => {
+        await this.lockTimeSlot(tx, id);
+        await this.findTimeSlotOrThrow(tx, id);
 
-    return this.prisma.timeSlot.update({
-      where: { id },
-      data: { status: dto.status },
-      select: timeSlotSelect,
-    });
+        const timeSlot = await tx.timeSlot.update({
+          where: { id },
+          data: { status: dto.status },
+          select: timeSlotSelect,
+        });
+
+        return this.toCapacityResponse(timeSlot);
+      },
+      { isolationLevel: Prisma.TransactionIsolationLevel.Serializable },
+    );
+  }
+
+  async updateCapacity(id: string, dto: UpdateTimeSlotCapacityDto) {
+    return this.prisma.$transaction(
+      async (tx) => {
+        await this.lockTimeSlot(tx, id);
+        const timeSlot = await this.findTimeSlotOrThrow(tx, id);
+        const activeBookingCount = timeSlot._count.bookings;
+
+        if (dto.capacity < activeBookingCount) {
+          throw new ConflictException(
+            `Capacity cannot be lower than the ${activeBookingCount} active booking${activeBookingCount === 1 ? '' : 's'} already using this slot`,
+          );
+        }
+
+        const updatedTimeSlot = await tx.timeSlot.update({
+          where: { id },
+          data: { capacity: dto.capacity },
+          select: timeSlotSelect,
+        });
+
+        return this.toCapacityResponse(updatedTimeSlot);
+      },
+      { isolationLevel: Prisma.TransactionIsolationLevel.Serializable },
+    );
   }
 
   private async findActiveServiceOrThrow(serviceId: string) {
@@ -143,13 +210,50 @@ export class TimeSlotsService {
     return service;
   }
 
+  private async lockTimeSlot(tx: Prisma.TransactionClient, timeSlotId: string) {
+    await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${timeSlotId}))`;
+  }
+
+  private async findTimeSlotOrThrow(tx: Prisma.TransactionClient, id: string) {
+    const timeSlot = await tx.timeSlot.findUnique({
+      where: { id },
+      select: timeSlotSelect,
+    });
+
+    if (!timeSlot) {
+      throw new NotFoundException('Time slot not found');
+    }
+
+    return timeSlot;
+  }
+
+  private toCapacityResponse(
+    timeSlot: TimeSlotWithCapacity | AdminTimeSlotWithCapacity,
+  ) {
+    const { _count, ...timeSlotData } = timeSlot;
+    const activeBookingCount = _count.bookings;
+    const remainingSpots = Math.max(
+      timeSlotData.capacity - activeBookingCount,
+      0,
+    );
+
+    return {
+      ...timeSlotData,
+      activeBookingCount,
+      remainingSpots,
+      isFull: remainingSpots === 0,
+    };
+  }
+
   private validateTimeRange(startAt: Date, endAt: Date) {
     if (endAt <= startAt) {
       throw new BadRequestException('endAt must be after startAt');
     }
   }
 
-  private isUniqueConstraintError(error: unknown): error is Prisma.PrismaClientKnownRequestError {
+  private isUniqueConstraintError(
+    error: unknown,
+  ): error is Prisma.PrismaClientKnownRequestError {
     return (
       error instanceof Prisma.PrismaClientKnownRequestError &&
       error.code === 'P2002'

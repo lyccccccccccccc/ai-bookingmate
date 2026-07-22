@@ -73,7 +73,7 @@ export function ServiceDetailPage() {
     } catch (caughtError) {
       if (isAxiosError(caughtError) && caughtError.response?.status === 409) {
         setBookingError(
-          'This time slot has already been booked. Please choose another time.',
+          'This time slot is fully booked or no longer available. Please choose another time.',
         )
         await loadAvailableTimeSlots(serviceId)
       } else {
@@ -149,9 +149,13 @@ export function ServiceDetailPage() {
                             className="button primary"
                             type="button"
                             onClick={() => void handleBookTimeSlot(timeSlot.id)}
-                            disabled={bookingTimeSlotId === timeSlot.id}
+                            disabled={
+                              timeSlot.isFull || bookingTimeSlotId === timeSlot.id
+                            }
                           >
-                            {bookingTimeSlotId === timeSlot.id
+                            {timeSlot.isFull
+                              ? 'Fully booked'
+                              : bookingTimeSlotId === timeSlot.id
                               ? 'Booking...'
                               : 'Book this time'}
                           </button>

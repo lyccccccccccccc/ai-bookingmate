@@ -3,6 +3,7 @@ import { useEffect, useState, type FormEvent } from 'react'
 import {
   createTimeSlot,
   getAdminTimeSlots,
+  updateTimeSlotCapacity,
   updateTimeSlotStatus,
   type AdminTimeSlot,
   type TimeSlotStatus,
@@ -17,6 +18,7 @@ type TimeSlotFormState = {
   startAt: string
   endAt: string
   status: 'AVAILABLE' | 'BLOCKED'
+  capacity: string
 }
 
 const emptyTimeSlotForm: TimeSlotFormState = {
@@ -24,6 +26,7 @@ const emptyTimeSlotForm: TimeSlotFormState = {
   startAt: '',
   endAt: '',
   status: 'AVAILABLE',
+  capacity: '1',
 }
 
 const statusFilters: StatusFilter[] = ['ALL', 'AVAILABLE', 'BOOKED', 'BLOCKED']
@@ -122,6 +125,7 @@ export function AdminTimeSlotsPage() {
         startAt: new Date(form.startAt).toISOString(),
         endAt: new Date(form.endAt).toISOString(),
         status: form.status,
+        capacity: Number(form.capacity),
       })
       await loadTimeSlots()
       setForm({
@@ -150,6 +154,22 @@ export function AdminTimeSlotsPage() {
       setMessage(`Time slot ${status === 'BLOCKED' ? 'blocked' : 'unblocked'}.`)
     } catch (caughtError) {
       setError(getErrorMessage(caughtError, 'Could not update time slot'))
+    } finally {
+      setUpdatingSlotId(null)
+    }
+  }
+
+  async function handleCapacityUpdate(slot: AdminTimeSlot, capacity: number) {
+    setUpdatingSlotId(slot.id)
+    setError('')
+    setMessage('')
+
+    try {
+      await updateTimeSlotCapacity(slot.id, capacity)
+      await loadTimeSlots()
+      setMessage('Time slot capacity updated.')
+    } catch (caughtError) {
+      setError(getErrorMessage(caughtError, 'Could not update time slot capacity'))
     } finally {
       setUpdatingSlotId(null)
     }
@@ -263,6 +283,19 @@ export function AdminTimeSlotsPage() {
             </select>
           </label>
 
+          <label>
+            Capacity
+            <input
+              required
+              min="1"
+              type="number"
+              value={form.capacity}
+              onChange={(event) =>
+                setForm({ ...form, capacity: event.target.value })
+              }
+            />
+          </label>
+
           <button className="button primary" type="submit" disabled={isSaving}>
             {isSaving ? 'Saving...' : 'Create time slot'}
           </button>
@@ -283,6 +316,9 @@ export function AdminTimeSlotsPage() {
               isUpdating={updatingSlotId === slot.id}
               onBlock={() => void handleStatusUpdate(slot, 'BLOCKED')}
               onUnblock={() => void handleStatusUpdate(slot, 'AVAILABLE')}
+              onCapacityChange={(capacity) =>
+                void handleCapacityUpdate(slot, capacity)
+              }
             />
           ))}
         </section>
@@ -296,14 +332,22 @@ function AdminTimeSlotCard({
   isUpdating,
   onBlock,
   onUnblock,
+  onCapacityChange,
 }: {
   slot: AdminTimeSlot
   isUpdating: boolean
   onBlock: () => void
   onUnblock: () => void
+  onCapacityChange: (capacity: number) => void
 }) {
   const startAt = new Date(slot.startAt)
   const endAt = new Date(slot.endAt)
+  const [capacity, setCapacity] = useState(String(slot.capacity))
+
+  function handleCapacitySubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    onCapacityChange(Number(capacity))
+  }
 
   return (
     <article className="admin-card">
@@ -330,7 +374,35 @@ function AdminTimeSlotCard({
           <dt>End</dt>
           <dd>{formatTime(endAt)}</dd>
         </div>
+        <div>
+          <dt>Capacity</dt>
+          <dd>{slot.capacity}</dd>
+        </div>
+        <div>
+          <dt>Booked places</dt>
+          <dd>{slot.activeBookingCount}</dd>
+        </div>
+        <div>
+          <dt>Remaining places</dt>
+          <dd>{slot.remainingSpots}</dd>
+        </div>
       </div>
+
+      <form className="booking-actions" onSubmit={handleCapacitySubmit}>
+        <label className="inline-field">
+          Update capacity
+          <input
+            required
+            min="1"
+            type="number"
+            value={capacity}
+            onChange={(event) => setCapacity(event.target.value)}
+          />
+        </label>
+        <button className="button secondary" type="submit" disabled={isUpdating}>
+          {isUpdating ? 'Updating...' : 'Save capacity'}
+        </button>
+      </form>
 
       <div className="booking-actions">
         {slot.status === 'AVAILABLE' ? (

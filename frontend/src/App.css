@@ -2705,6 +2705,15 @@ dd {
   gap: 10px;
 }
 
+.inline-field {
+  flex: 1 1 160px;
+  max-width: 220px;
+}
+
+.inline-field input {
+  width: 100%;
+}
+
 .assistant-page {
   display: grid;
   gap: 18px;

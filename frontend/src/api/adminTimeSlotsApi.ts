@@ -21,6 +21,7 @@ export type CreateTimeSlotData = {
   startAt: string
   endAt: string
   status?: Exclude<TimeSlotStatus, 'BOOKED'>
+  capacity?: number
 }
 
 export async function getAdminTimeSlots(filters: AdminTimeSlotFilters = {}) {
@@ -41,6 +42,13 @@ export async function updateTimeSlotStatus(
 ) {
   const response = await apiClient.patch<TimeSlot>(`/time-slots/${id}/status`, {
     status,
+  })
+  return response.data
+}
+
+export async function updateTimeSlotCapacity(id: string, capacity: number) {
+  const response = await apiClient.patch<TimeSlot>(`/time-slots/${id}/capacity`, {
+    capacity,
   })
   return response.data
 }

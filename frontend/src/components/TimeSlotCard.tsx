@@ -19,7 +19,11 @@ export function TimeSlotCard({ timeSlot, action }: TimeSlotCardProps) {
         </p>
       </div>
 
-      <span className="status-pill">{timeSlot.status}</span>
+      <span className={`status-pill status-${timeSlot.status.toLowerCase()}`}>
+        {timeSlot.isFull
+          ? 'Fully booked'
+          : `${timeSlot.remainingSpots} ${timeSlot.remainingSpots === 1 ? 'spot' : 'spots'} remaining`}
+      </span>
 
       {action ? <div className="slot-action">{action}</div> : null}
     </article>

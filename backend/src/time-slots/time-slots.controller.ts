@@ -15,6 +15,7 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { CreateTimeSlotDto } from './dto/create-time-slot.dto';
 import { UpdateTimeSlotStatusDto } from './dto/update-time-slot-status.dto';
+import { UpdateTimeSlotCapacityDto } from './dto/update-time-slot-capacity.dto';
 import { TimeSlotsService } from './time-slots.service';
 
 type TimeSlotFilters = {
@@ -61,5 +62,17 @@ export class TimeSlotsController {
     @Body() updateTimeSlotStatusDto: UpdateTimeSlotStatusDto,
   ) {
     return this.timeSlotsService.updateStatus(id, updateTimeSlotStatusDto);
+  }
+
+  @Patch('time-slots/:id/capacity')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Update a time slot capacity as admin' })
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  updateCapacity(
+    @Param('id') id: string,
+    @Body() updateTimeSlotCapacityDto: UpdateTimeSlotCapacityDto,
+  ) {
+    return this.timeSlotsService.updateCapacity(id, updateTimeSlotCapacityDto);
   }
 }

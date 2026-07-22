@@ -165,6 +165,14 @@ Use `npx prisma migrate deploy` for production migrations. `npm run seed` is opt
 
 Health monitoring is available at `GET /health`. See `docs/day-18-production-deployment.md` for deployment architecture, required variables, Docker commands, security checks, and troubleshooting.
 
+## Day 19 Capacity-Based Bookings
+
+Day 19 adds capacity to time slots so group lessons can accept multiple customers while private lessons remain limited to one booking. Active `PENDING` and `CONFIRMED` bookings consume capacity; cancelled bookings do not.
+
+Time-slot APIs now return `capacity`, `activeBookingCount`, `remainingSpots`, and `isFull`. Booking, cancellation, blocking, and capacity updates use PostgreSQL transaction advisory locks to prevent concurrent overbooking.
+
+See `docs/day-19-capacity-based-bookings.md` for migration guidance, API behavior, concurrency details, admin/customer workflows, and test coverage.
+
 ## Day 17 Advanced Frontend Layout
 
 Day 17 upgrades the frontend into a fuller demo-ready SaaS layout with wider page structures, two-column screens, side panels, summary cards, stat rows, richer empty states, and clearer product storytelling.

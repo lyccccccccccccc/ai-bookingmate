@@ -17,6 +17,10 @@ export type TimeSlot = {
   startAt: string
   endAt: string
   status: 'AVAILABLE' | 'BOOKED' | 'BLOCKED'
+  capacity: number
+  activeBookingCount: number
+  remainingSpots: number
+  isFull: boolean
   createdAt: string
   updatedAt: string
 }

@@ -16,15 +16,15 @@ Different services can have different durations, prices, and availability. Linki
 
 ## Time Slot Statuses
 
-- `AVAILABLE`: customers can book this slot.
-- `BOOKED`: a future booking flow will mark this slot as booked.
+- `AVAILABLE`: customers can book this slot while it has remaining capacity.
+- `BOOKED`: retained for legacy migration compatibility; Day 19 does not use it to represent a full group slot.
 - `BLOCKED`: admins can reserve or hide this slot so customers cannot book it.
 
 ## Why Day 5 Does Not Manually Set BOOKED
 
 Day 5 only manages availability. The API allows admins to switch slots between `AVAILABLE` and `BLOCKED`.
 
-The `BOOKED` status should be controlled by the booking workflow later, because booking a slot also needs to create a booking record and connect it to a customer.
+Day 19 keeps `BOOKED` unavailable for manual admin updates and uses active booking counts rather than a status change to decide when a slot is full.
 
 ## Overlap Detection
 

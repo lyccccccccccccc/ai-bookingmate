@@ -33,15 +33,15 @@ with:
 
 The `apiClient` automatically attaches the JWT from localStorage as a Bearer token.
 
-## Why The Backend Changes TimeSlot Status
+## Why The Backend Owns Availability
 
-The frontend never manually changes a time slot from `AVAILABLE` to `BOOKED`.
+The frontend never manually changes a time slot status or capacity.
 
 That rule belongs on the backend because the backend owns the transaction that:
 
-1. checks the slot is still available
-2. updates the slot to `BOOKED`
-3. creates the booking
+1. checks that the slot is not blocked
+2. counts active bookings against capacity
+3. creates the booking only when a place remains
 
 This keeps double-booking prevention reliable.
 
@@ -76,7 +76,7 @@ PATCH /bookings/:id/cancel
 
 After cancellation succeeds, the page refreshes the booking list.
 
-The backend changes the related time slot back to `AVAILABLE` when appropriate.
+The cancelled booking no longer consumes a place, so the related slot can appear publicly again when it has remaining capacity.
 
 ## Double-Booking Errors
 
