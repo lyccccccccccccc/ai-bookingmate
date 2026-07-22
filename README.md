@@ -165,6 +165,8 @@ Use `npx prisma migrate deploy` for production migrations. `npm run seed` is opt
 
 Health monitoring is available at `GET /health`. See `docs/day-18-production-deployment.md` for deployment architecture, required variables, Docker commands, security checks, and troubleshooting.
 
+Use `docs/production-release-checklist.md` for final environment, migration, smoke-test, admin-account, backup, and rollback steps before a public demo release.
+
 ## Day 19 Capacity-Based Bookings
 
 Day 19 adds capacity to time slots so group lessons can accept multiple customers while private lessons remain limited to one booking. Active `PENDING` and `CONFIRMED` bookings consume capacity; cancelled bookings do not.
@@ -178,6 +180,8 @@ See `docs/day-19-capacity-based-bookings.md` for migration guidance, API behavio
 Day 20 adds `POST /auth/forgot-password` and `POST /auth/reset-password`, plus frontend pages at `/forgot-password` and `/reset-password`.
 
 In development and test environments, a reset request for an existing account returns a local reset link for manual testing. Production deliberately returns only a generic message: a real email provider is still required to deliver reset links to customers.
+
+Password-reset token flow is implemented and tested; email delivery is intentionally disabled in the public demo.
 
 For local password-reset verification alongside the production Docker stack, use the loopback-only PostgreSQL mapping at `127.0.0.1:5433`, run the backend on `3001` with `NODE_ENV=development`, and run Vite on `5174` with `VITE_API_URL=http://localhost:3001`. Docker services keep using the internal `postgres:5432` hostname.
 

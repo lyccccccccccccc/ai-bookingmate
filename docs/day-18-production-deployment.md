@@ -61,7 +61,7 @@ Then open:
 - Health check: `http://localhost:3000/health`
 - Swagger: `http://localhost:3000/api/docs`
 
-The backend allows only `FRONTEND_URL` in production. Development keeps the local Vite fallback of `http://localhost:5173`. CORS explicitly permits credentials, standard HTTP methods, and `Content-Type`/`Authorization` headers; it never uses a wildcard production origin.
+The backend allows only `FRONTEND_URL` in production. The local development example uses Vite at `http://localhost:5174`. CORS explicitly permits credentials, standard HTTP methods, and `Content-Type`/`Authorization` headers; it never uses a wildcard production origin.
 
 ## Database Operations
 

@@ -4,6 +4,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../auth/AuthContext'
 
 export function LoginPage() {
+  const isProductionBuild = import.meta.env.PROD
   const { login } = useAuth()
   const navigate = useNavigate()
   const [email, setEmail] = useState('')
@@ -56,9 +57,11 @@ export function LoginPage() {
           />
         </label>
 
-        <p className="forgot-password-link">
-          <Link to="/forgot-password">Forgot password?</Link>
-        </p>
+        {!isProductionBuild ? (
+          <p className="forgot-password-link">
+            <Link to="/forgot-password">Forgot password?</Link>
+          </p>
+        ) : null}
 
         <button className="button primary full-width" type="submit" disabled={isSubmitting}>
           {isSubmitting ? 'Logging in...' : 'Login'}
