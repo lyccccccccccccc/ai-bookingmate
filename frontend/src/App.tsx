@@ -10,10 +10,12 @@ import { AdminServicesPage } from './pages/AdminServicesPage'
 import { AdminTimeSlotsPage } from './pages/AdminTimeSlotsPage'
 import { AssistantPage } from './pages/AssistantPage'
 import { DashboardPage } from './pages/DashboardPage'
+import { ForgotPasswordPage } from './pages/ForgotPasswordPage'
 import { HomePage } from './pages/HomePage'
 import { LoginPage } from './pages/LoginPage'
 import { MyBookingsPage } from './pages/MyBookingsPage'
 import { RegisterPage } from './pages/RegisterPage'
+import { ResetPasswordPage } from './pages/ResetPasswordPage'
 import { ServiceDetailPage } from './pages/ServiceDetailPage'
 import { ServicesPage } from './pages/ServicesPage'
 
@@ -29,6 +31,8 @@ function App() {
           <Route path="/assistant" element={<AssistantPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
+          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+          <Route path="/reset-password" element={<ResetPasswordPage />} />
           <Route element={<ProtectedRoute />}>
             <Route path="/dashboard" element={<DashboardPage />} />
             <Route path="/my-bookings" element={<MyBookingsPage />} />

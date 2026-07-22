@@ -173,6 +173,16 @@ Time-slot APIs now return `capacity`, `activeBookingCount`, `remainingSpots`, an
 
 See `docs/day-19-capacity-based-bookings.md` for migration guidance, API behavior, concurrency details, admin/customer workflows, and test coverage.
 
+## Day 20 Password Reset
+
+Day 20 adds `POST /auth/forgot-password` and `POST /auth/reset-password`, plus frontend pages at `/forgot-password` and `/reset-password`.
+
+In development and test environments, a reset request for an existing account returns a local reset link for manual testing. Production deliberately returns only a generic message: a real email provider is still required to deliver reset links to customers.
+
+For local password-reset verification alongside the production Docker stack, use the loopback-only PostgreSQL mapping at `127.0.0.1:5433`, run the backend on `3001` with `NODE_ENV=development`, and run Vite on `5174` with `VITE_API_URL=http://localhost:3001`. Docker services keep using the internal `postgres:5432` hostname.
+
+See `docs/day-20-password-reset.md` for token security, API behavior, and manual testing instructions.
+
 ## Day 17 Advanced Frontend Layout
 
 Day 17 upgrades the frontend into a fuller demo-ready SaaS layout with wider page structures, two-column screens, side panels, summary cards, stat rows, richer empty states, and clearer product storytelling.

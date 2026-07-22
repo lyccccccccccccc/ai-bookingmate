@@ -46,5 +46,6 @@ export async function clearTestDatabase(prisma: PrismaService) {
   await prisma.timeSlot.deleteMany()
   await prisma.service.deleteMany()
   await prisma.businessRule.deleteMany()
+  await prisma.passwordResetToken.deleteMany()
   await prisma.user.deleteMany()
 }

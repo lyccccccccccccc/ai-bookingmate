@@ -56,6 +56,10 @@ export function LoginPage() {
           />
         </label>
 
+        <p className="forgot-password-link">
+          <Link to="/forgot-password">Forgot password?</Link>
+        </p>
+
         <button className="button primary full-width" type="submit" disabled={isSubmitting}>
           {isSubmitting ? 'Logging in...' : 'Login'}
         </button>

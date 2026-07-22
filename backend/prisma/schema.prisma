@@ -24,14 +24,28 @@ enum TimeSlotStatus {
 }
 
 model User {
-  id           String    @id @default(cuid())
-  email        String    @unique
-  passwordHash String
-  name         String
-  role         Role      @default(CUSTOMER)
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
-  bookings     Booking[]
+  id                  String               @id @default(cuid())
+  email               String               @unique
+  passwordHash        String
+  name                String
+  role                Role                 @default(CUSTOMER)
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt
+  bookings            Booking[]
+  passwordResetTokens PasswordResetToken[]
+}
+
+model PasswordResetToken {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash String   @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime @default(now())
+
+  @@index([userId, usedAt])
+  @@index([tokenHash, expiresAt])
 }
 
 model Service {
