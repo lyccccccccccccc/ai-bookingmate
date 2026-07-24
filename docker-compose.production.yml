@@ -18,8 +18,8 @@ services:
 
   migrate:
     build:
-      context: .
-      dockerfile: backend/Dockerfile
+      context: ./backend
+      dockerfile: Dockerfile
       target: build
     command: npx prisma migrate deploy
     environment:
@@ -31,8 +31,8 @@ services:
 
   backend:
     build:
-      context: .
-      dockerfile: backend/Dockerfile
+      context: ./backend
+      dockerfile: Dockerfile
     environment:
       NODE_ENV: production
       PORT: 3000
@@ -53,8 +53,8 @@ services:
 
   frontend:
     build:
-      context: .
-      dockerfile: frontend/Dockerfile
+      context: ./frontend
+      dockerfile: Dockerfile
     environment:
       VITE_API_URL: ${VITE_API_URL:-http://localhost:3000}
     ports:
