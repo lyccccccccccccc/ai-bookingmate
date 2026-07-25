@@ -1,214 +1,210 @@
 # AI BookingMate
 
-AI BookingMate is a SaaS-style booking platform for small service businesses.
+A production-deployed full-stack booking and customer-support platform for service businesses, featuring capacity-based scheduling, role-based administration, and a business-rule-grounded assistant.
+
+[![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=white)](https://react.dev/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5%2F6-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![NestJS](https://img.shields.io/badge/NestJS-11-E0234E?logo=nestjs&logoColor=white)](https://nestjs.com/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-4169E1?logo=postgresql&logoColor=white)](https://www.postgresql.org/)
+[![Prisma](https://img.shields.io/badge/Prisma-7-2D3748?logo=prisma&logoColor=white)](https://www.prisma.io/)
+[![Docker](https://img.shields.io/badge/Docker-Production-2496ED?logo=docker&logoColor=white)](https://www.docker.com/)
+[![Railway](https://img.shields.io/badge/Deployed_on-Railway-0B0D0E?logo=railway&logoColor=white)](https://railway.com/)
+[![Jest](https://img.shields.io/badge/Tests-Jest-C21325?logo=jest&logoColor=white)](https://jestjs.io/)
+
+## Live Demo
+
+- [Live Application](https://frontend-production-f42b.up.railway.app)
+- [Backend Health](https://backend-production-3ddab.up.railway.app/health)
+- [Swagger API Documentation](https://backend-production-3ddab.up.railway.app/api/docs)
+
+Public registration is available. Administrator access is not publicly shared.
+
+## Demo Overview
+
+AI BookingMate models a real service-booking workflow from public discovery through administration. Customers can register, browse services, inspect capacity, book private or group sessions, and manage their bookings. Administrators can configure services, schedules, capacities, bookings, and the business rules that ground assistant answers.
+
+## Key Features
+
+### Customer experience
+
+- Registration and JWT-based login
+- Public service and available-time browsing
+- Private and capacity-based group bookings
+- Personal booking history and cancellation
+- Live remaining-place visibility
+
+### Administration
+
+- Create, update, and deactivate services
+- Create, block, unblock, filter, and edit time slots
+- Configure capacity for private and group sessions
+- Review, confirm, and cancel customer bookings
+- Manage assistant business rules
+
+### Grounded assistant
+
+- Retrieves administrator-defined business rules before answering
+- Supports optional OpenAI synthesis without exposing the API key
+- Uses a deterministic retrieval fallback when OpenAI is unavailable
+- Shows answer mode, confidence, and grounding sources
+
+### Engineering
+
+- Transaction-safe capacity enforcement and cancellation restoration
+- Concurrent-overbooking protection
+- Role-based backend authorization
+- Secure password-reset token hashing, expiry, and single-use handling
+- Versioned Prisma migrations and production environment validation
+- Database-aware health monitoring and Swagger documentation
+
+## Architecture
+
+```mermaid
+flowchart LR
+    Browser["Browser"] --> Frontend["React + Vite frontend<br/>Railway Frontend"]
+    Frontend -->|"REST / JSON"| API["NestJS REST API<br/>Railway Backend"]
+    API --> Prisma["Prisma ORM"]
+    Prisma --> Database[("Railway PostgreSQL")]
+    API --> Rules["Business-rule retrieval"]
+    Rules --> Fallback["Deterministic fallback"]
+    Rules --> OpenAI["OpenAI API<br/>(optional)"]
+```
+
+The frontend reads its public API URL at container startup. The backend owns authentication, authorization, booking transactions, assistant grounding, and database access.
+
+## Technical Highlights
+
+### Capacity-based group bookings
+
+Each time slot has configurable capacity. `PENDING` and `CONFIRMED` bookings consume places, while `CANCELLED` bookings release them. Full slots disappear from public availability and cannot accept new bookings.
+
+### Concurrency protection
+
+Booking writes use serializable transactions with PostgreSQL advisory locking around each time slot. Concurrent requests reload current booking state inside the lock, preventing successful bookings from exceeding capacity.
+
+### Authentication and authorization
+
+JWT authentication protects customer workflows. `CUSTOMER` and `ADMIN` roles are enforced by NestJS guards, with the backend remaining the authorization boundary for every administrative action.
+
+### Assistant grounding
+
+The assistant retrieves active FAQ content and administrator-defined rules before responding. OpenAI synthesis is optional; the tested deterministic fallback remains available when no API key is configured or the external request fails.
+
+### Password-reset security
+
+Reset tokens are cryptographically random, stored only as SHA-256 hashes, expire after 30 minutes, and are single-use. Production never exposes raw reset tokens. Email delivery is intentionally disabled in the public demo.
 
 ## Tech Stack
 
-- Frontend: React, TypeScript, Vite
-- Backend: NestJS, TypeScript, Node.js
-- Future AI service: Python, FastAPI
-- Package manager: npm
+| Area | Technologies |
+| --- | --- |
+| Frontend | React, TypeScript, Vite, React Router, Axios, CSS |
+| Backend | NestJS, TypeScript, Prisma, PostgreSQL, JWT, Passport, bcrypt, Swagger |
+| Testing | Jest, Supertest, isolated PostgreSQL E2E database |
+| Deployment | Docker, Nginx, Railway, GitHub |
 
-## Day 1 Status
+## Screenshots
 
-Day 1 project scaffolding is complete. The repository has a clean monorepo-style structure with separate folders for the frontend, backend, future AI service, and documentation.
+The screenshot set is intentionally marked as pending so missing image files are not presented as completed assets. See the [screenshot capture guide](docs/screenshots/README.md) for the required routes, filenames, and privacy checks.
 
-No business features have been implemented yet.
+<table>
+  <tr>
+    <td width="50%"><strong>Home</strong><br><code>docs/screenshots/home.png</code><br><em>Screenshot pending</em></td>
+    <td width="50%"><strong>Services</strong><br><code>docs/screenshots/services.png</code><br><em>Screenshot pending</em></td>
+  </tr>
+  <tr>
+    <td><strong>Booking capacity</strong><br><code>docs/screenshots/booking-capacity.png</code><br><em>Screenshot pending</em></td>
+    <td><strong>My Bookings</strong><br><code>docs/screenshots/my-bookings.png</code><br><em>Screenshot pending</em></td>
+  </tr>
+  <tr>
+    <td><strong>Admin time slots</strong><br><code>docs/screenshots/admin-time-slots.png</code><br><em>Screenshot pending</em></td>
+    <td><strong>Admin business rules</strong><br><code>docs/screenshots/admin-rules.png</code><br><em>Screenshot pending</em></td>
+  </tr>
+  <tr>
+    <td><strong>Assistant</strong><br><code>docs/screenshots/assistant.png</code><br><em>Screenshot pending</em></td>
+    <td><strong>Swagger</strong><br><code>docs/screenshots/swagger.png</code><br><em>Screenshot pending</em></td>
+  </tr>
+</table>
 
-## Day 2 Database Setup
+## API Documentation
 
-Day 2 adds the PostgreSQL and Prisma foundation for the NestJS backend. The root `docker-compose.yml` defines a local PostgreSQL service, and the backend contains the first Prisma schema for users, services, time slots, and bookings.
+Interactive production documentation is available through [Swagger UI](https://backend-production-3ddab.up.railway.app/api/docs). The API covers authentication, services, time slots, capacity-aware bookings, business rules, assistant questions, and health monitoring.
 
-See `docs/day-02-database.md` for the database design, manual Docker Compose startup command, migration command, Prisma Studio command, and Day 2 acceptance criteria.
+## Testing
 
-## Day 3 Authentication Setup
+Verified automated results:
 
-Day 3 adds backend authentication with register, login, JWT-protected routes, request validation, and basic role-based access control for admin-only endpoints.
+- Backend unit tests: **4 suites, 12 tests passed**
+- Backend E2E tests: **6 suites, 29 tests passed**
 
-See `docs/day-03-auth.md` for the auth flow, password hashing notes, JWT explanation, manual API testing commands, and Day 3 acceptance criteria.
-
-## Day 4 Services API
-
-Day 4 adds backend endpoints for listing active services publicly and managing services through admin-only create, update, and soft delete actions.
-
-See `docs/day-04-services.md` for the service model explanation, endpoint list, manual curl testing steps, and Day 4 acceptance criteria.
-
-## Day 5 Time Slots API
-
-Day 5 adds backend endpoints for admins to create and manage service time slots, plus a public endpoint for customers to view available slots for an active service.
-
-See `docs/day-05-time-slots.md` for time slot status rules, overlap detection, endpoint details, manual curl testing steps, and Day 5 acceptance criteria.
-
-## Day 6 Bookings API
-
-Day 6 adds backend endpoints for authenticated customers to create and cancel bookings, plus admin endpoints for listing and updating booking status.
-
-See `docs/day-06-bookings.md` for booking transactions, double-booking prevention, customer and admin endpoints, manual curl testing steps, and Day 6 acceptance criteria.
-
-## Day 7 Developer Experience
-
-Day 7 adds Swagger API documentation at `http://localhost:3000/api/docs`, a `GET /health` endpoint, and an idempotent backend seed script.
-
-Run seed data from the backend folder:
+The isolated E2E suite covers authentication, services, time slots, bookings, capacity and concurrent booking, business rules, assistant fallback, password reset, and health checks. It requires a dedicated `DATABASE_URL_TEST` whose database name contains `test`, and automated tests do not make real OpenAI requests.
 
 ```cmd
+cd backend
+npm run test -- --runInBand
+npm run test:e2e
+```
+
+## Security and Reliability
+
+- Passwords are hashed with bcrypt
+- Reset tokens are hashed before storage and safely expired
+- Forgot-password responses prevent account enumeration
+- JWT and role guards protect private operations
+- DTO validation rejects unexpected request properties
+- OpenAI, JWT, and database secrets remain server-side
+- Production startup validates required environment values
+- PostgreSQL-backed health checks expose deployment readiness
+- Prisma migrations run through `prisma migrate deploy`
+
+## Local Development
+
+Prerequisites: Node.js 22+, npm, and PostgreSQL 16 or Docker Desktop.
+
+```cmd
+git clone https://github.com/lyccccccccccccc/ai-bookingmate.git
+cd ai-bookingmate
+docker compose up -d postgres
+
+cd backend
+copy .env.example .env
+npm install
+npx prisma migrate dev
 npm run seed
+npm run start:dev
 ```
 
-Seeded test accounts:
-
-- Admin: `admin@example.com` / `Password123!`
-- Customer: `customer.seed@example.com` / `Password123!`
-
-See `docs/day-07-seed-swagger.md` for Swagger usage, seed details, manual test commands, and Day 7 acceptance criteria.
-
-## Day 8 Frontend Authentication
-
-Day 8 adds React authentication pages, JWT session handling, protected dashboard routing, and backend CORS support for the Vite frontend.
-
-Frontend auth uses `VITE_API_URL=http://localhost:3000` and stores the JWT access token in localStorage under `accessToken`.
-
-See `docs/day-08-frontend-auth.md` for the auth flow, routes, manual testing steps, and Day 8 acceptance criteria.
-
-## Day 9 Frontend Services Browsing
-
-Day 9 adds public React pages for browsing active services and viewing available time slots for each service.
-
-Booking buttons are placeholders for Day 10 and do not call `POST /bookings` yet.
-
-See `docs/day-09-frontend-services.md` for the service browsing flow, backend API calls, manual testing steps, and Day 9 acceptance criteria.
-
-## Day 10 Frontend Bookings
-
-Day 10 adds frontend booking creation from available time slots and a protected `My Bookings` page where customers can view and cancel their bookings.
-
-The frontend calls the existing booking API and leaves time slot status changes to the backend transaction.
-
-See `docs/day-10-frontend-bookings.md` for the booking flow, cancellation behavior, double-booking handling, manual testing steps, and Day 10 acceptance criteria.
-
-## Day 11 Admin Booking Management
-
-Day 11 adds an admin-only frontend page at `/admin/bookings` for viewing, filtering, confirming, and cancelling customer bookings.
-
-The admin page is protected by a role-aware `AdminRoute`, while the backend remains the final authorization layer.
-
-See `docs/day-11-admin-bookings.md` for admin booking behavior, route protection, manual testing steps, and Day 11 acceptance criteria.
-
-## Day 12 Admin Services and Time Slots
-
-Day 12 adds admin-only frontend pages at `/admin/services` and `/admin/time-slots` for managing bookable services and availability.
-
-Admins can create, edit, and deactivate services, plus create, block, unblock, and filter time slots. The UI does not allow manually setting `BOOKED`; booking status remains controlled by the booking flow.
-
-See `docs/day-12-admin-services-time-slots.md` for admin service and time slot behavior, manual testing steps, and Day 12 acceptance criteria.
-
-## Day 13 FAQ Assistant
-
-Day 13 adds a customer FAQ assistant with a public backend endpoint at `POST /assistant/ask` and a frontend chat page at `/assistant`.
-
-The assistant uses a static backend knowledge base and deterministic keyword scoring, then can optionally call OpenAI from the backend when `OPENAI_API_KEY` is configured. If OpenAI is not configured, it falls back to the matched FAQ answer.
-
-See `docs/day-13-faq-assistant.md` for the retrieval approach, API response shape, frontend behavior, limitations, manual testing steps, and Day 13 acceptance criteria.
-
-## Day 14 OpenAI Rule-Grounded Assistant
-
-Day 14 upgrades the assistant so admins can manage business rules that ground customer support answers.
-
-The backend adds a `BusinessRule` model, admin-only `/business-rules` endpoints, default seed rules, and an OpenAI-backed assistant flow that uses matched rules as context. `OPENAI_API_KEY` stays in `backend/.env`, and the assistant falls back to rule-based retrieval when OpenAI is not configured.
-
-See `docs/day-14-openai-rule-grounded-assistant.md` for the rule model, OpenAI setup, fallback behavior, manual testing steps, and Day 14 acceptance criteria.
-
-## Day 15 OpenAI Cost Controls
-
-Day 15 adds backend cost controls for the OpenAI-powered assistant.
-
-Use these backend environment values:
-
-```env
-OPENAI_MODEL="gpt-5.6-luna"
-OPENAI_MAX_OUTPUT_TOKENS="300"
-```
-
-The backend enforces an allowed model list and caps `OPENAI_MAX_OUTPUT_TOKENS` at 500. The OpenAI API key remains backend-only and is never exposed to the frontend.
-
-See `docs/day-15-openai-cost-controls.md` for model allowlist behavior, output token limits, and manual testing steps.
-
-## Day 16 Frontend Polish
-
-Day 16 improves the React frontend UI so the app feels more demo-ready as a SaaS booking product.
-
-The polish pass keeps the existing CSS setup and does not add a UI framework. It improves the navbar, landing page, service cards, booking views, assistant chat, dashboard, forms, and admin pages.
-
-See `docs/day-16-frontend-polish.md` for the UI changes, testing checklist, and acceptance criteria.
-
-## Automated Backend Testing
-
-The backend includes Jest unit tests and Supertest e2e tests for health, authentication, role checks, services, time slots, bookings, business rules, and assistant fallback behavior.
-
-E2E tests require a dedicated `DATABASE_URL_TEST` and will refuse to run against the normal development database. OpenAI calls are mocked in automated tests.
-
-See `docs/day-16-automated-testing.md` for safe test database setup, commands, covered workflows, and troubleshooting.
-
-## Day 18 Production Deployment
-
-Day 18 adds production-focused environment validation, restricted CORS, a database-aware health endpoint, Docker builds, and a safe Prisma migration strategy.
-
-The production Compose stack runs PostgreSQL, a one-off migration service, the NestJS backend, and the React frontend:
+In a second terminal:
 
 ```cmd
-docker compose -f docker-compose.production.yml up --build
+cd frontend
+copy .env.example .env
+npm install
+npm run dev -- --port 5174
 ```
 
-Set production secrets outside Git. The backend requires `DATABASE_URL`, `JWT_SECRET`, and `FRONTEND_URL` when `NODE_ENV=production`. The frontend reads its public backend address from `VITE_API_URL`; it never receives OpenAI or database secrets.
+The provided development examples use `http://localhost:3001` for the backend, `http://localhost:5174` for the frontend, and `localhost:5433` for PostgreSQL. Local `.env` files are ignored by Git.
 
-Use `npx prisma migrate deploy` for production migrations. `npm run seed` is optional demo data only and should not run as part of a normal production deployment.
+## Production Deployment
 
-Health monitoring is available at `GET /health`. See `docs/day-18-production-deployment.md` for deployment architecture, required variables, Docker commands, security checks, and troubleshooting.
+The public demo runs as separate Railway PostgreSQL, backend, and frontend services. The backend and frontend use service-local Dockerfiles, Prisma migrations run as a backend pre-deploy command, and Nginx provides SPA fallback routing.
 
-Use `docs/production-release-checklist.md` for final environment, migration, smoke-test, admin-account, backup, and rollback steps before a public demo release.
+See the [Railway deployment guide](docs/railway-deployment.md) and [production release checklist](docs/production-release-checklist.md) for environment variables, migration safety, health checks, initial admin setup, backups, and rollback.
 
-## Day 19 Capacity-Based Bookings
+## Known Limitations
 
-Day 19 adds capacity to time slots so group lessons can accept multiple customers while private lessons remain limited to one booking. Active `PENDING` and `CONFIRMED` bookings consume capacity; cancelled bookings do not.
+- Password-reset email delivery is not enabled in the public demo
+- OpenAI-generated responses require a server-side API key
+- Without OpenAI, the assistant uses its tested retrieval fallback
+- Payment processing and notifications are outside the current project scope
 
-Time-slot APIs now return `capacity`, `activeBookingCount`, `remainingSpots`, and `isFull`. Booking, cancellation, blocking, and capacity updates use PostgreSQL transaction advisory locks to prevent concurrent overbooking.
+## Future Improvements
 
-See `docs/day-19-capacity-based-bookings.md` for migration guidance, API behavior, concurrency details, admin/customer workflows, and test coverage.
+- Transactional email delivery for password resets and booking notifications
+- Payment-provider integration
+- Calendar synchronization and reminder scheduling
+- Expanded observability, audit history, and automated CI checks
 
-## Day 20 Password Reset
+## Author
 
-Day 20 adds `POST /auth/forgot-password` and `POST /auth/reset-password`, plus frontend pages at `/forgot-password` and `/reset-password`.
-
-In development and test environments, a reset request for an existing account returns a local reset link for manual testing. Production deliberately returns only a generic message: a real email provider is still required to deliver reset links to customers.
-
-Password-reset token flow is implemented and tested; email delivery is intentionally disabled in the public demo.
-
-For local password-reset verification alongside the production Docker stack, use the loopback-only PostgreSQL mapping at `127.0.0.1:5433`, run the backend on `3001` with `NODE_ENV=development`, and run Vite on `5174` with `VITE_API_URL=http://localhost:3001`. Docker services keep using the internal `postgres:5432` hostname.
-
-See `docs/day-20-password-reset.md` for token security, API behavior, and manual testing instructions.
-
-## Day 17 Advanced Frontend Layout
-
-Day 17 upgrades the frontend into a fuller demo-ready SaaS layout with wider page structures, two-column screens, side panels, summary cards, stat rows, richer empty states, and clearer product storytelling.
-
-The polished pages include service browsing, bookings, assistant chat, dashboard, and the admin console, while still using plain React, TypeScript, and CSS.
-
-See `docs/day-17-advanced-frontend-layout.md` for the layout improvements and manual testing checklist.
-
-## Day 17b Layout Refinement
-
-Day 17b refines the advanced layout into a wider, more balanced booking SaaS experience. It standardizes desktop page width, typography, panel spacing, service and booking card rhythm, and responsive behavior, with a focused redesign of the assistant workspace.
-
-See `docs/day-17b-layout-refinement.md` for the visual issues addressed and the updated testing checklist.
-
-## Home, Services, And Assistant Presentation
-
-The customer-facing Home, Services, and Assistant pages use a wider SaaS-style presentation layout with a consistent typography scale, responsive card grids, and a chat-first assistant workspace. The implementation uses only the existing React and CSS setup.
-
-See `docs/day-17b-home-services-assistant-redesign.md` for the focused redesign notes and manual testing checklist.
-
-## Planned Features
-
-- Customer booking workflow
-- Role-based access control
-- AI FAQ assistant
+Built as a full-stack software engineering portfolio project by [lyccccccccccccc](https://github.com/lyccccccccccccc).
