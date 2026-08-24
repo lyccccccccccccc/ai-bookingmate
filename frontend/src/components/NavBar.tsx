@@ -1,9 +1,24 @@
+import { motion, useReducedMotion } from 'framer-motion'
+import { useEffect, useState } from 'react'
 import { Link, NavLink, useNavigate } from 'react-router-dom'
 import { useAuth } from '../auth/AuthContext'
 
 export function NavBar() {
   const { user, logout } = useAuth()
   const navigate = useNavigate()
+  const reduceMotion = useReducedMotion()
+  const [isScrolled, setIsScrolled] = useState(false)
+
+  useEffect(() => {
+    function updateNavbar() {
+      setIsScrolled(window.scrollY > 10)
+    }
+
+    updateNavbar()
+    window.addEventListener('scroll', updateNavbar, { passive: true })
+
+    return () => window.removeEventListener('scroll', updateNavbar)
+  }, [])
 
   function handleLogout() {
     logout()
@@ -11,7 +26,12 @@ export function NavBar() {
   }
 
   return (
-    <header className="navbar">
+    <motion.header
+      className={`navbar ${isScrolled ? 'navbar-scrolled' : ''}`}
+      initial={reduceMotion ? false : { opacity: 0, y: -8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, ease: 'easeOut' }}
+    >
       <Link className="brand" to="/">
         AI BookingMate
       </Link>
@@ -41,14 +61,12 @@ export function NavBar() {
             </button>
           </>
         ) : (
-          <>
-            <span className="nav-group">
-              <NavLink to="/login">Login</NavLink>
-              <NavLink to="/register">Register</NavLink>
-            </span>
-          </>
+          <span className="nav-group">
+            <NavLink to="/login">Login</NavLink>
+            <NavLink to="/register">Register</NavLink>
+          </span>
         )}
       </nav>
-    </header>
+    </motion.header>
   )
 }
