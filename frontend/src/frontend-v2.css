@@ -182,7 +182,7 @@ body {
 
 .frontend-v2-hero .hero-copy h1 {
   color: var(--v2-text);
-  font-size: clamp(3.25rem, 5vw, 4.75rem) !important;
+  font-size: clamp(2.75rem, 4.2vw, 4rem) !important;
   font-weight: 760;
   letter-spacing: -0.055em;
   line-height: 1.01 !important;
@@ -606,7 +606,7 @@ body {
   }
 
   .frontend-v2-hero .hero-copy h1 {
-    font-size: clamp(2.8rem, 5vw, 3.75rem) !important;
+    font-size: clamp(2.4rem, 4.2vw, 3.2rem) !important;
   }
 
   .home-feature-grid {
@@ -694,7 +694,7 @@ body {
   }
 
   .frontend-v2-hero .hero-copy h1 {
-    font-size: clamp(2.35rem, 11vw, 3.1rem) !important;
+    font-size: clamp(2rem, 9.25vw, 2.65rem) !important;
     letter-spacing: -0.045em;
   }
 
