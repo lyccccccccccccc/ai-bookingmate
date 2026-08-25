@@ -1,4 +1,5 @@
 import { isAxiosError } from 'axios'
+import { motion, useReducedMotion } from 'framer-motion'
 import { useEffect, useState } from 'react'
 import {
   getAllBookings,
@@ -6,16 +7,18 @@ import {
   type AdminBooking,
 } from '../api/adminBookingsApi'
 import type { BookingStatus } from '../api/bookingsApi'
+import {
+  AdminEmptyState,
+  AdminFeedback,
+  AdminListSkeleton,
+  AdminPageHeader,
+} from '../components/admin/AdminWorkspace'
 import { formatDate, formatTime } from '../components/TimeSlotCard'
+import '../admin-v2.css'
 
 type StatusFilter = 'ALL' | BookingStatus
 
-const statusOptions: StatusFilter[] = [
-  'ALL',
-  'PENDING',
-  'CONFIRMED',
-  'CANCELLED',
-]
+const statusOptions: StatusFilter[] = ['ALL', 'PENDING', 'CONFIRMED', 'CANCELLED']
 
 export function AdminBookingsPage() {
   const [bookings, setBookings] = useState<AdminBooking[]>([])
@@ -27,9 +30,7 @@ export function AdminBookingsPage() {
 
   async function loadBookings(filter: StatusFilter) {
     setError('')
-    const data = await getAllBookings(
-      filter === 'ALL' ? {} : { status: filter },
-    )
+    const data = await getAllBookings(filter === 'ALL' ? {} : { status: filter })
     setBookings(data)
   }
 
@@ -87,50 +88,54 @@ export function AdminBookingsPage() {
   }
 
   return (
-    <main className="page admin-bookings-page">
-      <section className="page-header">
-        <p className="eyebrow">Admin</p>
-        <h1>Booking Management</h1>
-        <p className="lede">
-          Review customer bookings and update pending or confirmed appointments.
-        </p>
-      </section>
+    <main className="page admin-bookings-page admin-v2-page">
+      <AdminPageHeader
+        title="Bookings"
+        description="Review customer bookings and manage their status."
+        action={!isLoading ? <span className="admin-count-badge">{bookings.length} shown</span> : undefined}
+      />
 
-      <section className="admin-toolbar" aria-label="Booking filters">
-        <label className="filter-label">
-          Status filter
-          <select
-            value={statusFilter}
-            onChange={(event) =>
-              setStatusFilter(event.target.value as StatusFilter)
-            }
-          >
+      <AdminFeedback message={message} error={error} />
+
+      <section className="admin-v2-controls" aria-label="Booking filters">
+        <div>
+          <span>Booking status</span>
+          <div className="admin-segmented-control">
             {statusOptions.map((status) => (
-              <option key={status} value={status}>
-                {status}
-              </option>
+              <button
+                className={statusFilter === status ? 'active' : ''}
+                key={status}
+                type="button"
+                onClick={() => setStatusFilter(status)}
+                aria-pressed={statusFilter === status}
+                disabled={isLoading || updatingBookingId !== null}
+              >
+                {formatStatus(status)}
+              </button>
             ))}
-          </select>
-        </label>
+          </div>
+        </div>
       </section>
 
-      {message ? <p className="success-message">{message}</p> : null}
-      {isLoading ? <p className="state-message">Loading bookings...</p> : null}
-      {error ? <p className="error-message">{error}</p> : null}
+      {isLoading ? <AdminListSkeleton rows={4} /> : null}
+
       {!isLoading && !error && bookings.length === 0 ? (
-        <p className="state-message">No bookings match this filter.</p>
+        <AdminEmptyState
+          title="No bookings match these filters"
+          description="Choose another status to review the rest of the booking queue."
+        />
       ) : null}
 
       {!isLoading && bookings.length > 0 ? (
-        <section className="bookings-list" aria-label="Admin bookings">
-          {bookings.map((booking) => (
-            <AdminBookingCard
+        <section className="admin-v2-list" aria-label="Admin bookings">
+          {bookings.map((booking, index) => (
+            <AdminBookingRow
               key={booking.id}
               booking={booking}
+              index={index}
               isUpdating={updatingBookingId === booking.id}
-              onConfirm={() =>
-                void handleStatusUpdate(booking.id, 'CONFIRMED')
-              }
+              isAnyUpdating={updatingBookingId !== null}
+              onConfirm={() => void handleStatusUpdate(booking.id, 'CONFIRMED')}
               onCancel={() => void handleStatusUpdate(booking.id, 'CANCELLED')}
             />
           ))}
@@ -140,94 +145,101 @@ export function AdminBookingsPage() {
   )
 }
 
-function AdminBookingCard({
+function AdminBookingRow({
   booking,
+  index,
   isUpdating,
+  isAnyUpdating,
   onConfirm,
   onCancel,
 }: {
   booking: AdminBooking
+  index: number
   isUpdating: boolean
+  isAnyUpdating: boolean
   onConfirm: () => void
   onCancel: () => void
 }) {
+  const reduceMotion = useReducedMotion()
   const startAt = new Date(booking.timeSlot.startAt)
   const endAt = new Date(booking.timeSlot.endAt)
 
   return (
-    <article className="booking-card admin-booking-card">
-      <div className="booking-card-header">
-        <div>
-          <h2>{booking.service.name}</h2>
-          <p className="card-description">Booking ID: {booking.id}</p>
-        </div>
-        <span className={`status-pill status-${booking.status.toLowerCase()}`}>
-          {booking.status}
+    <motion.article
+      className={`admin-booking-row admin-row-${booking.status.toLowerCase()}`}
+      initial={reduceMotion ? false : { opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.34, delay: reduceMotion ? 0 : Math.min(index * 0.04, 0.24) }}
+    >
+      <div className="admin-booking-primary">
+        <span className="admin-record-mark" aria-hidden="true">
+          {booking.service.name.charAt(0).toUpperCase()}
         </span>
-      </div>
-
-      <div className="booking-details-grid admin-booking-grid">
         <div>
-          <dt>Customer</dt>
-          <dd>{booking.customer.name}</dd>
-        </div>
-        <div>
-          <dt>Email</dt>
-          <dd>{booking.customer.email}</dd>
-        </div>
-        <div>
-          <dt>Date</dt>
-          <dd>{formatDate(startAt)}</dd>
-        </div>
-        <div>
-          <dt>Time</dt>
-          <dd>
-            {formatTime(startAt)} to {formatTime(endAt)}
-          </dd>
+          <span>{booking.customer.name}</span>
+          <h2>{booking.service.name}</h2>
+          <small>{booking.customer.email}</small>
         </div>
       </div>
 
-      {booking.notes ? <p className="booking-notes">{booking.notes}</p> : null}
+      <dl className="admin-booking-facts">
+        <div><dt>Date</dt><dd>{formatDate(startAt)}</dd></div>
+        <div><dt>Time</dt><dd>{formatTime(startAt)} - {formatTime(endAt)}</dd></div>
+        <div>
+          <dt>Session</dt>
+          <dd>{booking.timeSlot.capacity > 1 ? `Group, capacity ${booking.timeSlot.capacity}` : 'Private, capacity 1'}</dd>
+        </div>
+      </dl>
 
-      <div className="booking-actions">
-        {booking.status === 'PENDING' ? (
-          <button
-            className="button primary"
-            type="button"
-            onClick={onConfirm}
-            disabled={isUpdating}
-          >
-            {isUpdating ? 'Updating...' : 'Confirm'}
-          </button>
-        ) : null}
+      <motion.span
+        className={`status-pill status-${booking.status.toLowerCase()}`}
+        key={booking.status}
+        initial={reduceMotion ? false : { opacity: 0.65 }}
+        animate={{ opacity: 1 }}
+      >
+        {formatStatus(booking.status)}
+      </motion.span>
 
-        {booking.status !== 'CANCELLED' ? (
-          <button
-            className="button danger"
-            type="button"
-            onClick={onCancel}
-            disabled={isUpdating}
-          >
-            {isUpdating ? 'Updating...' : 'Cancel'}
-          </button>
-        ) : null}
+      {booking.notes ? <p className="admin-booking-notes"><strong>Notes</strong>{booking.notes}</p> : null}
+
+      <div className="admin-row-footer">
+        <span>#{booking.id.slice(-8).toUpperCase()}</span>
+        <div className="admin-row-actions">
+          {booking.status === 'PENDING' ? (
+            <button
+              className="button primary admin-compact-button"
+              type="button"
+              onClick={onConfirm}
+              disabled={isAnyUpdating}
+            >
+              {isUpdating ? 'Updating...' : 'Confirm'}
+            </button>
+          ) : null}
+          {booking.status !== 'CANCELLED' ? (
+            <button
+              className="button admin-danger-outline admin-compact-button"
+              type="button"
+              onClick={onCancel}
+              disabled={isAnyUpdating}
+            >
+              {isUpdating ? 'Updating...' : 'Cancel'}
+            </button>
+          ) : null}
+        </div>
       </div>
-    </article>
+    </motion.article>
   )
+}
+
+function formatStatus(status: StatusFilter) {
+  return status.charAt(0) + status.slice(1).toLowerCase()
 }
 
 function getErrorMessage(error: unknown, fallback: string) {
   if (isAxiosError<{ message?: string | string[] }>(error)) {
     const message = error.response?.data?.message
-
-    if (Array.isArray(message)) {
-      return message.join(', ')
-    }
-
-    if (message) {
-      return message
-    }
+    if (Array.isArray(message)) return message.join(', ')
+    if (message) return message
   }
-
   return fallback
 }

@@ -1,4 +1,5 @@
 import { isAxiosError } from 'axios'
+import { motion, useReducedMotion } from 'framer-motion'
 import { useEffect, useState, type FormEvent } from 'react'
 import {
   createService,
@@ -7,7 +8,15 @@ import {
   type ServiceFormData,
 } from '../api/adminServicesApi'
 import { getServices, type Service } from '../api/servicesApi'
+import {
+  AdminEmptyState,
+  AdminFeedback,
+  AdminListSkeleton,
+  AdminPageHeader,
+} from '../components/admin/AdminWorkspace'
+import { formatPrice } from '../components/ServiceCard'
 import { formatDate } from '../components/TimeSlotCard'
+import '../admin-v2.css'
 
 type ServiceFormState = {
   name: string
@@ -54,17 +63,12 @@ export function AdminServicesPage() {
           setError(getErrorMessage(caughtError, 'Could not load services'))
         }
       } finally {
-        if (isMounted) {
-          setIsLoading(false)
-        }
+        if (isMounted) setIsLoading(false)
       }
     }
 
     void loadInitialServices()
-
-    return () => {
-      isMounted = false
-    }
+    return () => { isMounted = false }
   }, [])
 
   async function handleCreate(event: FormEvent<HTMLFormElement>) {
@@ -72,7 +76,6 @@ export function AdminServicesPage() {
     setIsSaving(true)
     setError('')
     setMessage('')
-
     try {
       await createService(toServicePayload(form))
       await loadServices()
@@ -91,8 +94,7 @@ export function AdminServicesPage() {
       name: service.name,
       description: service.description ?? '',
       durationMinutes: String(service.durationMinutes),
-      priceDollars:
-        service.priceCents === null ? '' : (service.priceCents / 100).toFixed(2),
+      priceDollars: service.priceCents === null ? '' : (service.priceCents / 100).toFixed(2),
     })
     setError('')
     setMessage('')
@@ -100,15 +102,10 @@ export function AdminServicesPage() {
 
   async function handleUpdate(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
-
-    if (!editingService) {
-      return
-    }
-
+    if (!editingService) return
     setIsSaving(true)
     setError('')
     setMessage('')
-
     try {
       await updateService(editingService.id, toServicePayload(editForm))
       await loadServices()
@@ -126,15 +123,10 @@ export function AdminServicesPage() {
     const confirmed = window.confirm(
       `Deactivate "${service.name}"? It will no longer appear to customers.`,
     )
-
-    if (!confirmed) {
-      return
-    }
-
+    if (!confirmed) return
     setIsSaving(true)
     setError('')
     setMessage('')
-
     try {
       await deactivateService(service.id)
       await loadServices()
@@ -147,124 +139,109 @@ export function AdminServicesPage() {
   }
 
   return (
-    <main className="page admin-page">
-      <section className="page-header">
-        <p className="eyebrow">Admin</p>
-        <h1>Admin Services</h1>
-        <p className="lede">
-          Create, edit, and deactivate the services customers can book.
-        </p>
-      </section>
+    <main className="page admin-page admin-v2-page">
+      <AdminPageHeader
+        title="Services"
+        description="Create and maintain the services customers can book."
+        action={!isLoading ? <span className="admin-count-badge">{services.length} active</span> : undefined}
+      />
 
-      {message ? <p className="success-message">{message}</p> : null}
-      {error ? <p className="error-message">{error}</p> : null}
+      <AdminFeedback message={message} error={error} />
 
-      <section className="two-column-layout admin-console-layout">
-        <aside className="side-panel">
-          <p className="eyebrow">Service catalog</p>
-          <h2>Control what customers can book.</h2>
-          <p>
-            Active services appear publicly. Deactivation keeps history intact
-            while removing the service from customer browsing.
-          </p>
-          <div className="side-panel-facts">
-            <span>{services.length} active services</span>
-            <span>Soft delete</span>
-            <span>Customer-facing</span>
+      <section className="admin-v2-form-card">
+        <div className="admin-section-heading">
+          <div>
+            <p className="eyebrow">Service editor</p>
+            <h2>{editingService ? 'Edit service' : 'Create service'}</h2>
+            <p>{editingService ? `Updating ${editingService.name}` : 'Add a customer-facing service to the active catalog.'}</p>
           </div>
-        </aside>
-
-        <div className="admin-console-main">
-          <section className="admin-form-section">
-            <h2>{editingService ? 'Edit Service' : 'Create Service'}</h2>
-            {editingService ? (
-              <div className="section-heading-row">
-                <p className="card-description">Editing {editingService.name}</p>
-                <button
-                  className="button secondary"
-                  type="button"
-                  onClick={() => setEditingService(null)}
-                >
-                  Cancel edit
-                </button>
-              </div>
-            ) : null}
-            <ServiceForm
-              form={editingService ? editForm : form}
-              submitLabel={
-                isSaving
-                  ? 'Saving...'
-                  : editingService
-                    ? 'Save changes'
-                    : 'Create service'
-              }
-              onSubmit={editingService ? handleUpdate : handleCreate}
-              onChange={editingService ? setEditForm : setForm}
+          {editingService ? (
+            <button
+              className="button secondary admin-compact-button"
+              type="button"
+              onClick={() => { setEditingService(null); setEditForm(emptyServiceForm) }}
               disabled={isSaving}
-            />
-          </section>
-
-          {isLoading ? <p className="state-message">Loading services...</p> : null}
-          {!isLoading && services.length === 0 ? (
-            <p className="state-message">No active services yet.</p>
-          ) : null}
-
-          {!isLoading && services.length > 0 ? (
-            <section className="admin-list" aria-label="Active services">
-          {services.map((service) => (
-            <article className="admin-card" key={service.id}>
-              <div className="booking-card-header">
-                <div>
-                  <h2>{service.name}</h2>
-                  <p className="card-description">
-                    {service.description || 'No description provided.'}
-                  </p>
-                </div>
-                <span className="status-pill status-available">
-                  {service.isActive ? 'ACTIVE' : 'INACTIVE'}
-                </span>
-              </div>
-
-              <div className="booking-details-grid">
-                <div>
-                  <dt>Duration</dt>
-                  <dd>{service.durationMinutes} minutes</dd>
-                </div>
-                <div>
-                  <dt>Price</dt>
-                  <dd>{formatPrice(service.priceCents)}</dd>
-                </div>
-                <div>
-                  <dt>Created</dt>
-                  <dd>{formatDate(new Date(service.createdAt))}</dd>
-                </div>
-              </div>
-
-              <div className="booking-actions">
-                <button
-                  className="button secondary"
-                  type="button"
-                  onClick={() => startEditing(service)}
-                  disabled={isSaving}
-                >
-                  Edit
-                </button>
-                <button
-                  className="button danger"
-                  type="button"
-                  onClick={() => void handleDeactivate(service)}
-                  disabled={isSaving}
-                >
-                  Deactivate
-                </button>
-              </div>
-            </article>
-          ))}
-            </section>
+            >
+              Cancel edit
+            </button>
           ) : null}
         </div>
+
+        <ServiceForm
+          form={editingService ? editForm : form}
+          submitLabel={isSaving ? 'Saving...' : editingService ? 'Save changes' : 'Create service'}
+          onSubmit={editingService ? handleUpdate : handleCreate}
+          onChange={editingService ? setEditForm : setForm}
+          disabled={isSaving}
+        />
       </section>
+
+      <section className="admin-v2-section-heading">
+        <div><p className="eyebrow">Service catalog</p><h2>Active services</h2></div>
+        <p>Deactivation preserves booking history while removing a service from public browsing.</p>
+      </section>
+
+      {isLoading ? <AdminListSkeleton /> : null}
+      {!isLoading && !error && services.length === 0 ? (
+        <AdminEmptyState title="No services found" description="Create a service above to make it available for scheduling." />
+      ) : null}
+
+      {!isLoading && services.length > 0 ? (
+        <section className="admin-v2-list admin-services-list" aria-label="Active services">
+          {services.map((service, index) => (
+            <ServiceRow
+              key={service.id}
+              service={service}
+              index={index}
+              disabled={isSaving}
+              onEdit={() => startEditing(service)}
+              onDeactivate={() => void handleDeactivate(service)}
+            />
+          ))}
+        </section>
+      ) : null}
     </main>
+  )
+}
+
+function ServiceRow({
+  service,
+  index,
+  disabled,
+  onEdit,
+  onDeactivate,
+}: {
+  service: Service
+  index: number
+  disabled: boolean
+  onEdit: () => void
+  onDeactivate: () => void
+}) {
+  const reduceMotion = useReducedMotion()
+  return (
+    <motion.article
+      className="admin-service-row"
+      initial={reduceMotion ? false : { opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.32, delay: reduceMotion ? 0 : Math.min(index * 0.04, 0.22) }}
+    >
+      <div className="admin-service-copy">
+        <div>
+          <h3>{service.name}</h3>
+          <span className="admin-state-pill state-active">Active</span>
+        </div>
+        <p>{service.description || 'No description provided.'}</p>
+      </div>
+      <dl className="admin-service-facts">
+        <div><dt>Duration</dt><dd>{service.durationMinutes} min</dd></div>
+        <div><dt>Price</dt><dd>{formatPrice(service.priceCents)}</dd></div>
+        <div><dt>Created</dt><dd>{formatDate(new Date(service.createdAt))}</dd></div>
+      </dl>
+      <div className="admin-row-actions">
+        <button className="button secondary admin-compact-button" type="button" onClick={onEdit} disabled={disabled}>Edit</button>
+        <button className="button admin-danger-outline admin-compact-button" type="button" onClick={onDeactivate} disabled={disabled}>Deactivate</button>
+      </div>
+    </motion.article>
   )
 }
 
@@ -282,55 +259,12 @@ function ServiceForm({
   onChange: (form: ServiceFormState) => void
 }) {
   return (
-    <form className="admin-form" onSubmit={onSubmit}>
-      <label>
-        Name
-        <input
-          required
-          value={form.name}
-          onChange={(event) => onChange({ ...form, name: event.target.value })}
-        />
-      </label>
-
-      <label>
-        Description
-        <input
-          value={form.description}
-          onChange={(event) =>
-            onChange({ ...form, description: event.target.value })
-          }
-        />
-      </label>
-
-      <label>
-        Duration in minutes
-        <input
-          min="1"
-          required
-          type="number"
-          value={form.durationMinutes}
-          onChange={(event) =>
-            onChange({ ...form, durationMinutes: event.target.value })
-          }
-        />
-      </label>
-
-      <label>
-        Price in dollars
-        <input
-          min="0"
-          step="0.01"
-          type="number"
-          value={form.priceDollars}
-          onChange={(event) =>
-            onChange({ ...form, priceDollars: event.target.value })
-          }
-        />
-      </label>
-
-      <button className="button primary" type="submit" disabled={disabled}>
-        {submitLabel}
-      </button>
+    <form className="admin-v2-form service-form-v2" onSubmit={onSubmit}>
+      <label>Name<input required value={form.name} onChange={(event) => onChange({ ...form, name: event.target.value })} /></label>
+      <label>Duration in minutes<input min="1" required type="number" value={form.durationMinutes} onChange={(event) => onChange({ ...form, durationMinutes: event.target.value })} /></label>
+      <label className="admin-wide-field">Description<textarea rows={3} value={form.description} onChange={(event) => onChange({ ...form, description: event.target.value })} /></label>
+      <label>Price in dollars<input min="0" step="0.01" type="number" value={form.priceDollars} onChange={(event) => onChange({ ...form, priceDollars: event.target.value })} /></label>
+      <div className="admin-form-submit"><button className="button primary" type="submit" disabled={disabled}>{submitLabel}</button></div>
     </form>
   )
 }
@@ -340,36 +274,15 @@ function toServicePayload(form: ServiceFormState): ServiceFormData {
     name: form.name.trim(),
     description: form.description.trim() || undefined,
     durationMinutes: Number(form.durationMinutes),
-    priceCents:
-      form.priceDollars === ''
-        ? undefined
-        : Math.round(Number(form.priceDollars) * 100),
+    priceCents: form.priceDollars === '' ? undefined : Math.round(Number(form.priceDollars) * 100),
   }
-}
-
-function formatPrice(priceCents: number | null) {
-  if (priceCents === null) {
-    return 'No price set'
-  }
-
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'AUD',
-  }).format(priceCents / 100)
 }
 
 function getErrorMessage(error: unknown, fallback: string) {
   if (isAxiosError<{ message?: string | string[] }>(error)) {
     const message = error.response?.data?.message
-
-    if (Array.isArray(message)) {
-      return message.join(', ')
-    }
-
-    if (message) {
-      return message
-    }
+    if (Array.isArray(message)) return message.join(', ')
+    if (message) return message
   }
-
   return fallback
 }
