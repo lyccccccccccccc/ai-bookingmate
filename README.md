@@ -103,28 +103,27 @@ Reset tokens are cryptographically random, stored only as SHA-256 hashes, expire
 | Testing | Jest, Supertest, isolated PostgreSQL E2E database |
 | Deployment | Docker, Nginx, Railway, GitHub |
 
-## Screenshots
+## Product Screenshots
 
-The screenshot set is intentionally marked as pending so missing image files are not presented as completed assets. See the [screenshot capture guide](docs/screenshots/README.md) for the required routes, filenames, and privacy checks.
+### Home
+![AI BookingMate home page](docs/screenshots/home.png)
 
-<table>
-  <tr>
-    <td width="50%"><strong>Home</strong><br><code>docs/screenshots/home.png</code><br><em>Screenshot pending</em></td>
-    <td width="50%"><strong>Services</strong><br><code>docs/screenshots/services.png</code><br><em>Screenshot pending</em></td>
-  </tr>
-  <tr>
-    <td><strong>Booking capacity</strong><br><code>docs/screenshots/booking-capacity.png</code><br><em>Screenshot pending</em></td>
-    <td><strong>My Bookings</strong><br><code>docs/screenshots/my-bookings.png</code><br><em>Screenshot pending</em></td>
-  </tr>
-  <tr>
-    <td><strong>Admin time slots</strong><br><code>docs/screenshots/admin-time-slots.png</code><br><em>Screenshot pending</em></td>
-    <td><strong>Admin business rules</strong><br><code>docs/screenshots/admin-rules.png</code><br><em>Screenshot pending</em></td>
-  </tr>
-  <tr>
-    <td><strong>Assistant</strong><br><code>docs/screenshots/assistant.png</code><br><em>Screenshot pending</em></td>
-    <td><strong>Swagger</strong><br><code>docs/screenshots/swagger.png</code><br><em>Screenshot pending</em></td>
-  </tr>
-</table>
+*Customer and admin booking workspace with services, availability, and AI support in one application.*
+
+### Capacity-Based Booking
+![Capacity-based booking workflow](docs/screenshots/booking-capacity.png)
+
+*Customers can see live availability and remaining capacity before confirming a booking.*
+
+### Admin Time Slot Management
+![Admin time slot management](docs/screenshots/admin-time-slots.png)
+
+*Administrators can create availability, configure capacity, block sessions, and monitor utilisation.*
+
+### Grounded AI Assistant
+![Business-rule-grounded AI assistant](docs/screenshots/assistant.png)
+
+*The assistant retrieves active business rules and FAQ content before answering, with grounding sources and confidence visible to the user.*
 
 ## API Documentation
 
