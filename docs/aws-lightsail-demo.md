@@ -2,7 +2,7 @@
 
 Target: Ubuntu 24.04, ai-bookingmate-demo, Sydney, 3.104.7.211.
 No new AWS resources, domain purchase, Railway migration, or Railway removal.
-This guide is prepared configuration; it is not evidence of a completed deployment.
+Deployment verification results are recorded in `docs/aws/demo-verification.md`.
 
 ## Before changes
 
@@ -91,6 +91,30 @@ random passwords stored only in a permission-600 file outside the repo, and futu
 Existing user passwords, roles, bookings, services and rules must remain untouched.
 Use explicit timezone offsets and verify displayed dates; Sydney and Brisbane offsets
 can differ during daylight saving. Keep administration credentials private.
+
+The additive initializer is `backend/prisma/seed-demo.cjs`. On the existing AWS demo:
+
+```sh
+sudo docker cp backend/prisma/seed-demo.cjs ai-bookingmate-backend-1:/app/prisma/seed-demo.cjs
+sudo docker compose --env-file .env.aws -f docker-compose.production.yml exec -T \
+  -e DEMO_SEED_CONFIRM=aws-demo \
+  -e DEMO_CREDENTIALS_FILE=/tmp/bookingmate-demo-credentials.json \
+  backend node prisma/seed-demo.cjs
+# On FIRST initialization only, copy newly generated credentials out of the container.
+umask 077
+sudo docker cp ai-bookingmate-backend-1:/tmp/bookingmate-demo-credentials.json "$HOME/bookingmate-demo-credentials.json"
+sudo chown ubuntu:ubuntu "$HOME/bookingmate-demo-credentials.json"
+chmod 600 "$HOME/bookingmate-demo-credentials.json"
+```
+
+Preserve the host credential file before recreating containers. On reruns, do not copy
+an old container credential file over the host file. The initializer never changes
+existing accounts or time slots and never deletes data. It adds seven upcoming daily
+slots for each demo service. Read credentials only in a private SSH terminal:
+`cat ~/bookingmate-demo-credentials.json`. Never paste them into chat or commit them.
+Run `python3 docs/aws/verify-demo.py` on the server for API smoke verification. It reads
+the private credential file without printing it; it creates a fictional customer and
+a cancelled test booking as evidence. It does not make real OpenAI calls.
 
 ## Acceptance checks
 
