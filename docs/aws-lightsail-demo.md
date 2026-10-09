@@ -116,6 +116,32 @@ Run `python3 docs/aws/verify-demo.py` on the server for API smoke verification. 
 the private credential file without printing it; it creates a fictional customer and
 a cancelled test booking as evidence. It does not make real OpenAI calls.
 
+After enabling a real model, use `AI_EXPECTED_MODE=openai python3 docs/aws/verify-demo.py`
+instead. This makes one actual assistant request and verifies mode `openai` and a nonempty
+answer; it incurs API usage. Do not run it repeatedly as an automated health check.
+
+## Real AI configuration
+
+The existing assistant uses the OpenAI Responses API. Configure `OPENAI_API_KEY` only
+on the server, alongside `OPENAI_MODEL` and `OPENAI_MAX_OUTPUT_TOKENS`. Currently verified
+AWS settings are model `gpt-5.6-luna` and maximum output tokens `300`. The SDK uses a
+10-second timeout and no retries. The model allowlist is enforced by backend code;
+an unlisted environment model falls back to the code default.
+
+Back up `.env.aws` to a private directory before editing. Preserve all unrelated values.
+Enter keys in a private editor or hidden-input terminal prompt, never in chat, Git, shell
+command arguments, or printed Compose configuration. Keep `.env.aws` mode 600, then run:
+
+```sh
+sudo docker compose --env-file .env.aws -f docker-compose.production.yml up -d --no-build --no-deps backend
+```
+
+The pre-AI environment backup is `/home/ubuntu/bookingmate-backups/pre-ai/.env.aws`.
+To undo only AI activation, restore that file and recreate only the backend as above.
+This restores the previous full environment, so review any later configuration changes
+before using it. Model errors/timeouts or unrelated questions with no retrieved context
+can still intentionally return `retrieval_fallback` even when a working key is configured.
+
 ## Acceptance checks
 
 - HTTPS certificate valid and HTTP redirects to HTTPS.

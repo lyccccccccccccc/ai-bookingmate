@@ -1,5 +1,6 @@
 """Run on Lightsail; never print credentials or authentication tokens."""
 import json
+import os
 import secrets
 import urllib.request
 import urllib.error
@@ -53,6 +54,8 @@ assert status == 200 and cancelled['status'] == 'CANCELLED', 'cancel failed'
 status, slots, _ = request('GET', path)
 assert any(s['id'] == slot['id'] for s in slots), 'availability restoration failed'
 print('PASS booking creation, ownership, cancellation, restored availability')
+expected_mode = os.environ.get('AI_EXPECTED_MODE', 'retrieval_fallback')
+assert expected_mode in ('openai', 'retrieval_fallback'), 'invalid expected mode'
 status, answer, _ = request('POST', '/assistant/ask', {'question': 'How do I cancel my booking?'})
-assert status in (200, 201) and answer['mode'] == 'retrieval_fallback', 'fallback failed'
-print('PASS assistant retrieval_fallback; real model NOT verified')
+assert status in (200, 201) and answer['mode'] == expected_mode and answer['answer'].strip(), 'assistant mode verification failed'
+print('PASS assistant ' + expected_mode)

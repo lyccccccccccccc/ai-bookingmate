@@ -55,3 +55,23 @@ Follow `docs/aws-lightsail-demo.md` for repeat deployment, backups and rollback.
 pre-change Git revision is stored in the backup. Current image IDs were retained because
 this deployment did not rebuild images. Application rollback preserves the database volume;
 restoring the pre-initialization database requires a separate reviewed restore procedure.
+
+## Real AI activation — subsequent verification on 2026-10-09
+
+- Existing authorized Railway backend key was retrieved privately and authenticated
+  against the OpenAI model-list API. No key or authentication token was printed.
+- Local environment files also contained nonempty keys; their validity was not tested
+  because the authenticated Railway key was reused.
+- Railway configured model variable is `gpt-5-mini`; this variable alone is not evidence
+  of its effective runtime model. Its assistant endpoint returned mode `openai` during
+  one live check, confirming a real response rather than the deterministic fallback.
+- AWS `.env.aws` was backed up to `/home/ubuntu/bookingmate-backups/pre-ai/.env.aws`.
+  Only OPENAI_API_KEY changed; all other lines, including model and existing secrets,
+  were verified unchanged. Temporary transfer files were removed.
+- Backend was recreated from its existing image without rebuilding or restarting
+  the database. Direct Responses API verification returned actual model `gpt-5.6-luna`,
+  status `completed`, nonempty output and 10 output tokens.
+- A public AWS `/api/assistant/ask` cancellation question returned mode `openai` and
+  a nonempty answer with a matched business rule.
+- Earlier fallback results above describe the pre-activation state; real-model
+  integration is now verified. Browser limitations remain unchanged.
