@@ -1,0 +1,12 @@
+bookingmate.3-104-7-211.sslip.io {
+    # NestJS has no global API prefix: remove only the proxy /api prefix.
+    handle_path /api/* {
+        reverse_proxy 127.0.0.1:3000
+    }
+    handle /health {
+        reverse_proxy 127.0.0.1:3000
+    }
+    handle {
+        reverse_proxy 127.0.0.1:8080
+    }
+}
