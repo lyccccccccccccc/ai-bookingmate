@@ -22,6 +22,12 @@ pnpm-debug.log*
 .env.*
 !.env.example
 
+# Deployment credentials and backups
+*.pem
+*.ppk
+*.dump
+bookingmate-demo-credentials.json
+
 # npm cache
 .npm-cache/
 

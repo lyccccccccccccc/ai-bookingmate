@@ -8,14 +8,14 @@ A production-deployed full-stack booking and customer-support platform for servi
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-4169E1?logo=postgresql&logoColor=white)](https://www.postgresql.org/)
 [![Prisma](https://img.shields.io/badge/Prisma-7-2D3748?logo=prisma&logoColor=white)](https://www.prisma.io/)
 [![Docker](https://img.shields.io/badge/Docker-Production-2496ED?logo=docker&logoColor=white)](https://www.docker.com/)
-[![Railway](https://img.shields.io/badge/Deployed_on-Railway-0B0D0E?logo=railway&logoColor=white)](https://railway.com/)
+[![AWS](https://img.shields.io/badge/Deployed_on-AWS_Lightsail-FF9900)](https://aws.amazon.com/lightsail/)
 [![Jest](https://img.shields.io/badge/Tests-Jest-C21325?logo=jest&logoColor=white)](https://jestjs.io/)
 
 ## Live Demo
 
-- [Live Application](https://frontend-production-f42b.up.railway.app)
-- [Backend Health](https://backend-production-3ddab.up.railway.app/health)
-- [Swagger API Documentation](https://backend-production-3ddab.up.railway.app/api/docs)
+- [Live Application](https://bookingmate.3-104-7-211.sslip.io)
+- [Backend Health](https://bookingmate.3-104-7-211.sslip.io/health)
+- [Swagger API Documentation (retained Railway deployment)](https://backend-production-3ddab.up.railway.app/api/docs)
 
 Public registration is available. Administrator access is not publicly shared.
 
@@ -61,10 +61,12 @@ AI BookingMate models a real service-booking workflow from public discovery thro
 
 ```mermaid
 flowchart LR
-    Browser["Browser"] --> Frontend["React + Vite frontend<br/>Railway Frontend"]
-    Frontend -->|"REST / JSON"| API["NestJS REST API<br/>Railway Backend"]
+    Browser["Browser"] --> Caddy["Caddy HTTPS<br/>AWS Lightsail"]
+    Caddy --> Frontend["React + Vite frontend<br/>Nginx container"]
+    Frontend -->|"Same-origin HTTPS /api"| Caddy
+    Caddy --> API["NestJS REST API<br/>Backend container"]
     API --> Prisma["Prisma ORM"]
-    Prisma --> Database[("Railway PostgreSQL")]
+    Prisma --> Database[("PostgreSQL container<br/>Persistent AWS demo volume")]
     API --> Rules["Business-rule retrieval"]
     Rules --> Fallback["Deterministic fallback"]
     Rules --> OpenAI["OpenAI API<br/>(optional)"]
@@ -101,7 +103,7 @@ Reset tokens are cryptographically random, stored only as SHA-256 hashes, expire
 | Frontend | React, TypeScript, Vite, React Router, Axios, CSS |
 | Backend | NestJS, TypeScript, Prisma, PostgreSQL, JWT, Passport, bcrypt, Swagger |
 | Testing | Jest, Supertest, isolated PostgreSQL E2E database |
-| Deployment | Docker, Nginx, Railway, GitHub |
+| Deployment | AWS Lightsail, Docker Compose, Caddy, Nginx, GitHub; Railway retained |
 
 ## Product Screenshots
 
@@ -186,9 +188,9 @@ The provided development examples use `http://localhost:3001` for the backend, `
 
 ## Production Deployment
 
-The public demo runs as separate Railway PostgreSQL, backend, and frontend services. The backend and frontend use service-local Dockerfiles, Prisma migrations run as a backend pre-deploy command, and Nginx provides SPA fallback routing.
+The public demo runs on the existing AWS Lightsail instance using Docker Compose for PostgreSQL, NestJS and Nginx. Host Caddy provides automatic HTTPS and proxies same-origin `/api` requests to the backend. Application and database ports bind only to loopback; PostgreSQL uses a persistent volume. Railway remains available as a separate deployment, and its data was not migrated.
 
-See the [Railway deployment guide](docs/railway-deployment.md) and [production release checklist](docs/production-release-checklist.md) for environment variables, migration safety, health checks, initial admin setup, backups, and rollback.
+See the [Lightsail deployment guide](docs/aws-lightsail-demo.md) and [deployment verification record](docs/aws/demo-verification.md) for configuration, additive demo initialization, backups and rollback. Historical API checks and real OpenAI Responses API calls passed; browser interaction and console checks remain unverified. The [Railway deployment guide](docs/railway-deployment.md) remains applicable to the retained Railway services.
 
 ## Known Limitations
 
