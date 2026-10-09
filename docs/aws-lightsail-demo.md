@@ -1,6 +1,8 @@
 # Existing Lightsail demo deployment
 
 Target: Ubuntu 24.04, ai-bookingmate-demo, Sydney, 3.104.7.211.
+Primary public demo: [AI BookingMate](https://bookingmate.3-104-7-211.sslip.io).
+Backend health: [AWS health check](https://bookingmate.3-104-7-211.sslip.io/health).
 No new AWS resources, domain purchase, Railway migration, or Railway removal.
 Deployment verification results are recorded in `docs/aws/demo-verification.md`.
 

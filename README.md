@@ -17,7 +17,7 @@ A production-deployed full-stack booking and customer-support platform for servi
 - [Backend Health](https://bookingmate.3-104-7-211.sslip.io/health)
 - [Swagger API Documentation (retained Railway deployment)](https://backend-production-3ddab.up.railway.app/api/docs)
 
-Public registration is available. Administrator access is not publicly shared.
+Use the [AWS Lightsail demo](https://bookingmate.3-104-7-211.sslip.io) to try registration, login, service browsing, bookings and the assistant. Public registration is available. Administrator access is not publicly shared. The Railway Swagger link above is retained for API documentation; the primary application demo is hosted on AWS.
 
 ## Demo Overview
 
@@ -129,7 +129,7 @@ Reset tokens are cryptographically random, stored only as SHA-256 hashes, expire
 
 ## API Documentation
 
-Interactive production documentation is available through [Swagger UI](https://backend-production-3ddab.up.railway.app/api/docs). The API covers authentication, services, time slots, capacity-aware bookings, business rules, assistant questions, and health monitoring.
+The primary [live application](https://bookingmate.3-104-7-211.sslip.io) and its [health check](https://bookingmate.3-104-7-211.sslip.io/health) are hosted on AWS Lightsail. Interactive API documentation remains available through the [retained Railway Swagger UI](https://backend-production-3ddab.up.railway.app/api/docs), because interactive Swagger requests through the AWS proxy have not been verified. The API covers authentication, services, time slots, capacity-aware bookings, business rules, assistant questions, and health monitoring.
 
 ## Testing
 
