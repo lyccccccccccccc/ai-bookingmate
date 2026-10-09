@@ -39,8 +39,6 @@ and confirmed unchanged, without printing either value.
 - Configuration and database backup: `/home/ubuntu/bookingmate-backups/pre-https/`.
 - Demo credentials: `/home/ubuntu/bookingmate-demo-credentials.json`, owner ubuntu, mode 600.
 - Retrieve credentials in a private SSH terminal only; never publish admin passwords.
-- The user's local SSH key is ignored by Git and its ACL permits the current user to read it.
-  A private-key screenshot was shared in chat; replace that SSH key after deployment.
 
 ## Remaining verification
 
@@ -48,7 +46,7 @@ The browser automation kernel failed to start due to the desktop sandbox helper 
 Browser rendering, interactive forms, localStorage JWT behavior, console/network absence
 of mixed content/CORS errors, and timezone labels therefore require manual verification.
 HTTP/API tests and source inspection do not substitute for those browser checks.
-Real OpenAI integration requires a server-side key and a separately verified model call.
+Real OpenAI integration was subsequently verified as described below.
 No complete database restore was exercised; archive readability was checked with pg_restore.
 
 Follow `docs/aws-lightsail-demo.md` for repeat deployment, backups and rollback. The
@@ -75,3 +73,23 @@ restoring the pre-initialization database requires a separate reviewed restore p
   a nonempty answer with a matched business rule.
 - Earlier fallback results above describe the pre-activation state; real-model
   integration is now verified. Browser limitations remain unchanged.
+
+## PR review scope
+
+The records above describe the earlier deployment session, not a new server audit.
+The PR review did not connect through SSH, change runtime settings, or rerun database
+initialization. It fixes transactional initialization and credential-file failure handling,
+adds isolated failure/idempotence tests, and ensures the API verifier attempts to cancel
+its booking if the ownership assertion fails. These revisions require an explicit later
+server update; they have not been applied by this code-only review.
+
+Review checks passed: five isolated initializer transaction/file-failure/idempotence
+tests, three offline verifier cleanup/mode checks, all four existing backend unit-test
+suites (12 tests), Compose configuration with placeholder variables, Python/Node syntax,
+and Git whitespace checks. The new tests use a transaction test double and mocked HTTP;
+they do not establish live PostgreSQL transaction behavior or browser behavior.
+Secret-format and forbidden-file scans of the branch history and final diff found no
+private keys, API tokens or database backups. Test passwords are fictional fixtures.
+The local Docker engine was unavailable, so no new container startup or local Caddy
+runtime validation was performed. The unchanged Caddy configuration was reviewed against
+the backend routes and its previous successful deployment validation.

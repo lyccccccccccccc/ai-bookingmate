@@ -66,7 +66,9 @@ Preserve POSTGRES_PASSWORD, JWT_SECRET, all other secrets, and the existing volu
 The frontend writes `/config.js` at startup, so changing the URL needs container
 recreation, not an image rebuild. Authentication uses a Bearer JWT in Authorization.
 The proxy strips `/api` because NestJS routes are `/auth`, `/services`, etc.
-Swagger is consequently available at `/api/api/docs`; health at `/health` or `/api/health`.
+The Swagger UI HTML is available at `/api/api/docs`; its interactive requests are not
+verified behind this stripped prefix. Use the retained Railway Swagger UI for interactive
+API documentation. Health is available at `/health` or `/api/health`.
 Nginx handles SPA deep links. Caddy supplies automatic HTTPS and HTTP redirection.
 
 With the same Compose project and existing built images:
@@ -92,7 +94,12 @@ Existing user passwords, roles, bookings, services and rules must remain untouch
 Use explicit timezone offsets and verify displayed dates; Sydney and Brisbane offsets
 can differ during daylight saving. Keep administration credentials private.
 
-The additive initializer is `backend/prisma/seed-demo.cjs`. On the existing AWS demo:
+The additive initializer is `backend/prisma/seed-demo.cjs`. Credentials are saved exclusively
+before database writes; all writes use one transaction. An existing credential file with
+a missing demo account causes a safe failure instead of overwriting passwords. A failed
+transaction removes only the credential file created by that run. If a process is killed,
+inspect any retained file and database state privately before retrying.
+On the existing AWS demo:
 
 ```sh
 sudo docker cp backend/prisma/seed-demo.cjs ai-bookingmate-backend-1:/app/prisma/seed-demo.cjs
@@ -114,7 +121,11 @@ slots for each demo service. Read credentials only in a private SSH terminal:
 `cat ~/bookingmate-demo-credentials.json`. Never paste them into chat or commit them.
 Run `python3 docs/aws/verify-demo.py` on the server for API smoke verification. It reads
 the private credential file without printing it; it creates a fictional customer and
-a cancelled test booking as evidence. It does not make real OpenAI calls.
+a cancelled test booking as evidence. The default expects fallback and is suitable only
+when the key is absent. Expected mode does not disable AI: with a configured key the
+request can call OpenAI even if the expected mode is fallback. Booking cancellation runs
+in a finally block if the ownership check fails; a cancellation failure requires manual
+inspection. Successful checks intentionally leave fictional users and cancelled bookings.
 
 After enabling a real model, use `AI_EXPECTED_MODE=openai python3 docs/aws/verify-demo.py`
 instead. This makes one actual assistant request and verifies mode `openai` and a nonempty

@@ -8,6 +8,9 @@ from datetime import datetime, timezone
 from zoneinfo import ZoneInfo
 
 BASE = 'https://bookingmate.3-104-7-211.sslip.io/api'
+expected_mode = os.environ.get('AI_EXPECTED_MODE', 'retrieval_fallback')
+if expected_mode not in ('openai', 'retrieval_fallback'):
+    raise ValueError('AI_EXPECTED_MODE must be openai or retrieval_fallback')
 
 def request(method, path, data=None, token=None):
     headers = {'Content-Type': 'application/json', 'Origin': BASE.removesuffix('/api')}
@@ -19,7 +22,10 @@ def request(method, path, data=None, token=None):
             body = response.read()
             return response.status, json.loads(body) if body else None, response.headers
     except urllib.error.HTTPError as error:
-        return error.code, None, error.headers
+        try:
+            return error.code, None, error.headers
+        finally:
+            error.close()
 
 with open('/home/ubuntu/bookingmate-demo-credentials.json') as f:
     credentials = json.load(f)
@@ -48,14 +54,15 @@ instant = datetime.fromisoformat(slot['startAt'].replace('Z', '+00:00'))
 print('PASS future slot UTC=%s Brisbane=%s Sydney=%s' % (instant.isoformat(), instant.astimezone(ZoneInfo('Australia/Brisbane')).isoformat(), instant.astimezone(ZoneInfo('Australia/Sydney')).isoformat()))
 status, booking, _ = request('POST', '/bookings', {'timeSlotId': slot['id'], 'notes': 'AWS deployment verification'}, tokens['CUSTOMER'])
 assert status == 201 and booking['status'] == 'PENDING', 'booking failed'
-assert request('PATCH', '/bookings/' + booking['id'] + '/cancel', {}, tokens['ADMIN'])[0] == 403, 'ownership enforcement failed'
-status, cancelled, _ = request('PATCH', '/bookings/' + booking['id'] + '/cancel', {}, tokens['CUSTOMER'])
-assert status == 200 and cancelled['status'] == 'CANCELLED', 'cancel failed'
+try:
+    assert request('PATCH', '/bookings/' + booking['id'] + '/cancel', {}, tokens['ADMIN'])[0] == 403, 'ownership enforcement failed'
+finally:
+    status, cancelled, _ = request('PATCH', '/bookings/' + booking['id'] + '/cancel', {}, tokens['CUSTOMER'])
+    if status != 200 or cancelled['status'] != 'CANCELLED':
+        raise RuntimeError('Test booking cancellation failed; inspect the verification customer booking privately')
 status, slots, _ = request('GET', path)
 assert any(s['id'] == slot['id'] for s in slots), 'availability restoration failed'
 print('PASS booking creation, ownership, cancellation, restored availability')
-expected_mode = os.environ.get('AI_EXPECTED_MODE', 'retrieval_fallback')
-assert expected_mode in ('openai', 'retrieval_fallback'), 'invalid expected mode'
 status, answer, _ = request('POST', '/assistant/ask', {'question': 'How do I cancel my booking?'})
 assert status in (200, 201) and answer['mode'] == expected_mode and answer['answer'].strip(), 'assistant mode verification failed'
 print('PASS assistant ' + expected_mode)
